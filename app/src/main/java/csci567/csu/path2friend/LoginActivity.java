@@ -5,11 +5,23 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
+import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
+
+import org.json.JSONObject;
+
+import java.net.MalformedURLException;
+
 public class LoginActivity extends AppCompatActivity {
+
+    static String TAG = "Login Activity:";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +38,33 @@ public class LoginActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        //Initializing Bluemix
+        try {
+            BMSClient.getInstance().initialize(getApplicationContext(),
+                    "https://path2friend.mybluemix.net", "dfb91080-472f-450d-b40a-a9cfeb0bc3b7");
+            Request request = new Request("/protected", Request.GET);
+
+            request.send(this, new ResponseListener() {
+                @Override
+                public void onSuccess(Response response) {
+                    Log.d(TAG, "onSuccess :: " + response.getResponseText());
+                }
+
+                @Override
+                public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
+                    if (null != t) {
+                        Log.d(TAG, "onFailure :: " + t.getMessage());
+                    } else if (null != extendedInfo) {
+                        Log.d(TAG, "onFailure :: " + extendedInfo.toString());
+                    } else {
+                        Log.d(TAG, "onFailure :: " + response.getResponseText());
+                    }
+                }
+            });
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
