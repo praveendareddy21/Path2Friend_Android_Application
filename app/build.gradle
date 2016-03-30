@@ -25,4 +25,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile group: 'com.ibm.mobilefirstplatform.clientsdk.android', name:'googleauthentication', version: '2.+', ext: 'aar', transitive: true
+    compile 'com.jakewharton:butterknife:7.0.1'
 }
