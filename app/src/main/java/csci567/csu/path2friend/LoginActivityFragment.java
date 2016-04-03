@@ -16,6 +16,27 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+//import com.cloudant.sync.datastore.Attachment;
+//import com.cloudant.sync.datastore.BasicDocumentRevision;
+//import com.cloudant.sync.datastore.Datastore;
+//import com.cloudant.sync.datastore.DatastoreManager;
+//import com.cloudant.sync.datastore.DatastoreNotCreatedException;
+//import com.cloudant.sync.datastore.DocumentBody;
+//import com.cloudant.sync.datastore.DocumentBodyFactory;
+//import com.cloudant.sync.datastore.DocumentException;
+//import com.cloudant.sync.datastore.DocumentRevision;
+//import com.cloudant.sync.datastore.MutableDocumentRevision;
+//import com.cloudant.sync.replication.Replicator;
+//import com.cloudant.sync.replication.ReplicatorBuilder;
+import com.cloudant.sync.datastore.Datastore;
+import com.cloudant.sync.datastore.DatastoreManager;
+import com.cloudant.sync.datastore.DatastoreNotCreatedException;
+import com.cloudant.sync.datastore.DocumentBodyFactory;
+import com.cloudant.sync.datastore.DocumentException;
+import com.cloudant.sync.datastore.DocumentRevision;
+import com.cloudant.sync.datastore.MutableDocumentRevision;
+import com.cloudant.sync.replication.Replicator;
+import com.cloudant.sync.replication.ReplicatorBuilder;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
@@ -25,7 +46,12 @@ import com.ibm.mobilefirstplatform.clientsdk.android.security.googleauthenticati
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -102,6 +128,34 @@ public class LoginActivityFragment extends Fragment {
                             editor.putString(getString(R.string.authToken), AuthorizationManager.getInstance().getUserIdentity().getId());
                             editor.putString(getString(R.string.emailID), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
                             editor.commit();
+
+                            File path = getActivity().getApplicationContext().getDir("datastores", Context.MODE_PRIVATE);
+                            DatastoreManager manager = new DatastoreManager(path.getAbsolutePath());
+
+                            try {
+                                Datastore ds = manager.openDatastore("my_datastore");
+
+                                MutableDocumentRevision rev = new MutableDocumentRevision();
+
+                                Map<String, String> json = new HashMap<String, String>();
+                                json.put(getString(R.string.authToken), AuthorizationManager.getInstance().getUserIdentity().getId());
+                                json.put(getString(R.string.emailID), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
+
+                                rev.body = DocumentBodyFactory.create(json);
+                                DocumentRevision revision = ds.createDocumentFromRevision(rev);
+
+                                URI uri = new URI("https://adectitherecollestenjusn:67dad2f730e22ddd4c4c5fe9cc734a5163a99709@bbbb5bd0-402a-4a80-9104-431fc3eecdf8-bluemix.cloudant.com/path2friend");
+                                Replicator replicator = ReplicatorBuilder.push().from(ds).to(uri).build();
+                                replicator.start();
+
+
+                            } catch (DatastoreNotCreatedException e) {
+                                e.printStackTrace();
+                            } catch (DocumentException e) {
+                                e.printStackTrace();
+                            } catch (URISyntaxException e) {
+                                e.printStackTrace();
+                            }
                         }
 
                         @Override
