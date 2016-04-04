@@ -8,6 +8,11 @@
     tools:context="csci567.csu.path2friend.LoginActivity">
 
 
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/p2f_bg" />
 
     <!--<android.support.design.widget.AppBarLayout-->
         <!--android:layout_width="match_parent"-->
