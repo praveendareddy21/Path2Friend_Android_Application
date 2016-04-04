@@ -35,8 +35,11 @@ import com.cloudant.sync.datastore.DocumentBodyFactory;
 import com.cloudant.sync.datastore.DocumentException;
 import com.cloudant.sync.datastore.DocumentRevision;
 import com.cloudant.sync.datastore.MutableDocumentRevision;
+import com.cloudant.sync.replication.PullFilter;
 import com.cloudant.sync.replication.Replicator;
 import com.cloudant.sync.replication.ReplicatorBuilder;
+import com.google.common.util.concurrent.Service;
+import com.google.common.util.concurrent.ServiceManager;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
@@ -52,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -129,30 +133,12 @@ public class LoginActivityFragment extends Fragment {
                             editor.putString(getString(R.string.emailID), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
                             editor.commit();
 
-                            File path = getActivity().getApplicationContext().getDir("datastores", Context.MODE_PRIVATE);
-                            DatastoreManager manager = new DatastoreManager(path.getAbsolutePath());
+                            //take user to maps
 
                             try {
-                                Datastore ds = manager.openDatastore("my_datastore");
-
-                                MutableDocumentRevision rev = new MutableDocumentRevision();
-
-                                Map<String, String> json = new HashMap<String, String>();
-                                json.put(getString(R.string.authToken), AuthorizationManager.getInstance().getUserIdentity().getId());
-                                json.put(getString(R.string.emailID), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
-
-                                rev.body = DocumentBodyFactory.create(json);
-                                DocumentRevision revision = ds.createDocumentFromRevision(rev);
-
-                                URI uri = new URI("https://adectitherecollestenjusn:67dad2f730e22ddd4c4c5fe9cc734a5163a99709@bbbb5bd0-402a-4a80-9104-431fc3eecdf8-bluemix.cloudant.com/path2friend");
-                                Replicator replicator = ReplicatorBuilder.push().from(ds).to(uri).build();
-                                replicator.start();
-
-
-                            } catch (DatastoreNotCreatedException e) {
-                                e.printStackTrace();
-                            } catch (DocumentException e) {
-                                e.printStackTrace();
+                                if (!checkIfUserExists(AuthorizationManager.getInstance().getUserIdentity().getDisplayName())) {
+                                    insertUser(AuthorizationManager.getInstance().getUserIdentity().getId(), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
+                                }
                             } catch (URISyntaxException e) {
                                 e.printStackTrace();
                             }
@@ -181,5 +167,60 @@ public class LoginActivityFragment extends Fragment {
             // permissions this app might request
 
         }
+    }
+
+    boolean checkIfUserExists(String emailID) throws URISyntaxException {
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put(getString(R.string.emailID), emailID);
+        PullFilter pullFilter = new PullFilter("", parameters);
+        Replicator replicator = ReplicatorBuilder.pull().from(getDBURI()).to(getDataStore()).filter(pullFilter).build();
+
+//        CountDownLatch latch = new CountDownLatch(1);
+//        ServiceManager.Listener listener = new ServiceManager.Listener(latch);
+        replicator.start();
+        return false;
+    }
+
+    void insertUser(String authToken, String emailID) {
+
+        try {
+
+
+            MutableDocumentRevision rev = new MutableDocumentRevision();
+
+            Map<String, String> json = new HashMap<String, String>();
+            json.put(getString(R.string.authToken), authToken);
+            json.put(getString(R.string.emailID), emailID);
+
+            rev.body = DocumentBodyFactory.create(json);
+            DocumentRevision revision = getDataStore().createDocumentFromRevision(rev);
+
+            Replicator replicator = ReplicatorBuilder.push().from(getDataStore()).to(getDBURI()).build();
+            replicator.start();
+
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    URI getDBURI() throws URISyntaxException {
+        URI uri = new URI("https://adectitherecollestenjusn:67dad2f730e22ddd4c4c5fe9cc734a5163a99709@bbbb5bd0-402a-4a80-9104-431fc3eecdf8-bluemix.cloudant.com/path2friend");
+        return uri;
+    }
+
+    Datastore getDataStore() {
+        File path = getActivity().getApplicationContext().getDir("datastores", Context.MODE_PRIVATE);
+        DatastoreManager manager = new DatastoreManager(path.getAbsolutePath());
+
+        try {
+            Datastore ds = manager.openDatastore("my_datastore");
+            return ds;
+        } catch (DatastoreNotCreatedException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
