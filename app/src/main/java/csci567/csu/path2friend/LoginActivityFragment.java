@@ -38,6 +38,7 @@ import com.cloudant.sync.datastore.MutableDocumentRevision;
 import com.cloudant.sync.replication.PullFilter;
 import com.cloudant.sync.replication.Replicator;
 import com.cloudant.sync.replication.ReplicatorBuilder;
+import com.firebase.client.Firebase;
 import com.google.common.util.concurrent.Service;
 import com.google.common.util.concurrent.ServiceManager;
 import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
@@ -59,6 +60,8 @@ import java.util.concurrent.CountDownLatch;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import csci567.csu.path2friend.database.FirebaseDataHandler;
+import csci567.csu.path2friend.database.UserData;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -170,57 +173,24 @@ public class LoginActivityFragment extends Fragment {
     }
 
     boolean checkIfUserExists(String emailID) throws URISyntaxException {
-        Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put(getString(R.string.emailID), emailID);
-        PullFilter pullFilter = new PullFilter("", parameters);
-        Replicator replicator = ReplicatorBuilder.pull().from(getDBURI()).to(getDataStore()).filter(pullFilter).build();
-
-//        CountDownLatch latch = new CountDownLatch(1);
-//        ServiceManager.Listener listener = new ServiceManager.Listener(latch);
-        replicator.start();
+//        Map<String, String> parameters = new HashMap<String, String>();
+//        parameters.put(getString(R.string.emailID), emailID);
+//        PullFilter pullFilter = new PullFilter("", parameters);
+//        Replicator replicator = ReplicatorBuilder.pull().from(getDBURI()).to(getDataStore()).filter(pullFilter).build();
+//
+////        CountDownLatch latch = new CountDownLatch(1);
+////        ServiceManager.Listener listener = new ServiceManager.Listener(latch);
+//        replicator.start();
         return false;
     }
 
     void insertUser(String authToken, String emailID) {
 
-        try {
+        Firebase.setAndroidContext(getActivity().getApplicationContext());
+        FirebaseDataHandler fd = new FirebaseDataHandler();
 
+        UserData userData = new UserData(emailID, 1);
 
-            MutableDocumentRevision rev = new MutableDocumentRevision();
-
-            Map<String, String> json = new HashMap<String, String>();
-            json.put(getString(R.string.authToken), authToken);
-            json.put(getString(R.string.emailID), emailID);
-
-            rev.body = DocumentBodyFactory.create(json);
-            DocumentRevision revision = getDataStore().createDocumentFromRevision(rev);
-
-            Replicator replicator = ReplicatorBuilder.push().from(getDataStore()).to(getDBURI()).build();
-            replicator.start();
-
-        } catch (DocumentException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
-    URI getDBURI() throws URISyntaxException {
-        URI uri = new URI("https://adectitherecollestenjusn:67dad2f730e22ddd4c4c5fe9cc734a5163a99709@bbbb5bd0-402a-4a80-9104-431fc3eecdf8-bluemix.cloudant.com/path2friend");
-        return uri;
-    }
-
-    Datastore getDataStore() {
-        File path = getActivity().getApplicationContext().getDir("datastores", Context.MODE_PRIVATE);
-        DatastoreManager manager = new DatastoreManager(path.getAbsolutePath());
-
-        try {
-            Datastore ds = manager.openDatastore("my_datastore");
-            return ds;
-        } catch (DatastoreNotCreatedException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        fd.save_userdata(userData);
     }
 }
