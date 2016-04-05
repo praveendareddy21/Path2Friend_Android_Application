@@ -186,6 +186,7 @@ public class LoginActivityFragment extends Fragment {
 
     void insertUser(String authToken, String emailID) {
 
+        emailID = emailID.replace('.', ',');
         Firebase.setAndroidContext(getActivity().getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
 
