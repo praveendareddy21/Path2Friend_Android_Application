@@ -9,6 +9,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,35 +24,41 @@ public class FirebaseDataHandler {
          myFirebaseRef = new Firebase("https://brilliant-inferno-6550.firebaseio.com");
     }
 
-    public void save_data_ex(){
-        //this.myFirebaseRef.child("key1").setValue("value1");
-        //this.myFirebaseRef.child("key2").setValue("value2");
-        this.myFirebaseRef.child("key1").setValue("value1");
 
-        Log.i(ACL, " setting values to keys");
-        this.myFirebaseRef.child("posts");
-        Map<String, String> post1 = new HashMap<String, String>();
-        post1.put("author", "gracehop");
-        post1.put("title", "Announcing COBOL, a New Programming Language");
-        this.myFirebaseRef.push().setValue(post1);
-        Map<String, String> post2 = new HashMap<String, String>();
-        post2.put("author", "alanisawesome");
-        post2.put("title", "The Turing Machine");
-        this.myFirebaseRef.push().setValue(post2);
-        Log.i(ACL, " pushing values to keys");
-    }
 
     public void save_userdata(UserData u){
 
 
 
         Firebase userRef = this.myFirebaseRef.child("users").child(u.getFullName());
-
         userRef.setValue(u);
         Log.i(ACL, " saving user data");
         }
 
+    public void setUserAuthenticated(String su){
 
+        Firebase userRef = this.myFirebaseRef.child("users");
+        final String userName = su;
+        final boolean result =false;
+
+        userRef.orderByKey().startAt(su).endAt(su).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(userName)) {
+                    Log.i(ACL, "User " + userName + " is already authenticated.");
+                    Model.setIsUserAuthenticated(true);
+                } else {
+                    Log.i(ACL, "search query for " + userName + " has returned false");
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+    }
 
 
     public void add_friend(String user,  String  friend){

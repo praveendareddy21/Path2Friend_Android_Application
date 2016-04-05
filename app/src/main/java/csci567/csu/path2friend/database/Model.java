@@ -2,6 +2,8 @@ package csci567.csu.path2friend.database;
 
 import android.util.Log;
 
+import csci567.csu.path2friend.database.UserData;
+
 
 public class Model {
 
@@ -12,6 +14,15 @@ public class Model {
     private static UserData CurrentUserData;
     private static UserData CurrentFriendData;
 
+    private static boolean isUserAuthenticated = false;
+
+    public static synchronized  boolean isUserAuthenticated() {
+        return isUserAuthenticated;
+    }
+
+    public static synchronized void setIsUserAuthenticated(boolean isUserAuthenticated) {
+        isUserAuthenticated = isUserAuthenticated;
+    }
 
     public static synchronized void setFriend(String friend) {
         Friend = friend;
@@ -55,7 +66,7 @@ public class Model {
         return test;
     }
     public static  synchronized void printModelState(){
-        Log.i(ACL, "current User : " + getCurrentUserData().getFullName());
+        Log.i(ACL, "current User : "+getCurrentUserData().getFullName());
         Log.i(ACL, "current Friend User : "+getCurrentFriendData().getFullName());
 
 
