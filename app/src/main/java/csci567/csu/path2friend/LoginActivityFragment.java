@@ -61,6 +61,7 @@ import java.util.concurrent.CountDownLatch;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import csci567.csu.path2friend.database.FirebaseDataHandler;
+import csci567.csu.path2friend.database.Model;
 import csci567.csu.path2friend.database.UserData;
 
 /**
@@ -138,13 +139,14 @@ public class LoginActivityFragment extends Fragment {
 
                             //take user to maps
 
-                            try {
+
                                 if (!checkIfUserExists(AuthorizationManager.getInstance().getUserIdentity().getDisplayName())) {
                                     insertUser(AuthorizationManager.getInstance().getUserIdentity().getId(), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
                                 }
-                            } catch (URISyntaxException e) {
-                                e.printStackTrace();
-                            }
+                                else {
+                                    Log.d(TAG, "User exists, proceed with app.");
+                                }
+
                         }
 
                         @Override
@@ -172,16 +174,14 @@ public class LoginActivityFragment extends Fragment {
         }
     }
 
-    boolean checkIfUserExists(String emailID) throws URISyntaxException {
-//        Map<String, String> parameters = new HashMap<String, String>();
-//        parameters.put(getString(R.string.emailID), emailID);
-//        PullFilter pullFilter = new PullFilter("", parameters);
-//        Replicator replicator = ReplicatorBuilder.pull().from(getDBURI()).to(getDataStore()).filter(pullFilter).build();
-//
-////        CountDownLatch latch = new CountDownLatch(1);
-////        ServiceManager.Listener listener = new ServiceManager.Listener(latch);
-//        replicator.start();
-        return false;
+    boolean checkIfUserExists(String emailID) {
+
+        Firebase.setAndroidContext(getActivity().getApplicationContext());
+        FirebaseDataHandler fd = new FirebaseDataHandler();
+
+        fd.setUserAuthenticated(emailID.replace('.', ','));
+
+        return Model.isUserAuthenticated();
     }
 
     void insertUser(String authToken, String emailID) {
