@@ -7,11 +7,13 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="csci567.csu.path2friend.LoginActivityFragment"
-    tools:showIn="@layout/activity_login">
+    tools:showIn="@layout/activity_login"
+    android:gravity="center_vertical">
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"/>
 
 </RelativeLayout>
