@@ -70,6 +70,11 @@ import csci567.csu.path2friend.database.UserData;
 public class LoginActivityFragment extends Fragment {
 
     static String TAG = "Login Activity Fragment:";
+    public interface DatabaseCallbackInterface {
+
+        void onSuccessfulUserAuthenticaion(String user);
+    }
+
     final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
 
     public LoginActivityFragment() {
@@ -179,9 +184,16 @@ public class LoginActivityFragment extends Fragment {
         Firebase.setAndroidContext(getActivity().getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
 
-        fd.setUserAuthenticated(emailID.replace('.', ','));
+        fd.setUserAuthenticated(emailID.replace('.', ','), new DatabaseCallbackInterface() {
+            @Override
+            public void onSuccessfulUserAuthenticaion(String user) {
+                Log.i(TAG, "Callback on successful user authentication for user "+user);
+                // code to continue after authentication
+            }
+        });
 
-        return Model.isUserAuthenticated();
+        return false;
+        //Model.isUserAuthenticated();
     }
 
     void insertUser(String authToken, String emailID) {

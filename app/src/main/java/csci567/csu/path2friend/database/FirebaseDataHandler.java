@@ -8,6 +8,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
+import csci567.csu.path2friend.LoginActivityFragment.DatabaseCallbackInterface;
 
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class FirebaseDataHandler {
     private final String ACL="DataBaseHandler";
     private Firebase myFirebaseRef;
+
 
 
     public FirebaseDataHandler(){
@@ -35,11 +37,12 @@ public class FirebaseDataHandler {
         Log.i(ACL, " saving user data");
         }
 
-    public void setUserAuthenticated(String su){
+    public void setUserAuthenticated(String su,DatabaseCallbackInterface callback ){
 
         Firebase userRef = this.myFirebaseRef.child("users");
         final String userName = su;
         final boolean result =false;
+        final DatabaseCallbackInterface callback1= callback;
 
         userRef.orderByKey().startAt(su).endAt(su).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -47,6 +50,7 @@ public class FirebaseDataHandler {
                 if (dataSnapshot.hasChild(userName)) {
                     Log.i(ACL, "User " + userName + " is already authenticated.");
                     Model.setIsUserAuthenticated(true);
+                    callback1.onSuccessfulUserAuthenticaion(userName);
                 } else {
                     Log.i(ACL, "search query for " + userName + " has returned false");
                 }
