@@ -73,6 +73,9 @@ public class LoginActivityFragment extends Fragment {
     public interface DatabaseCallbackInterface {
 
         void onSuccessfulUserAuthenticaion(String user);
+        void onFailedUserAuthenticaion(String user);
+
+
     }
 
     final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 1;
@@ -189,6 +192,10 @@ public class LoginActivityFragment extends Fragment {
             public void onSuccessfulUserAuthenticaion(String user) {
                 Log.i(TAG, "Callback on successful user authentication for user "+user);
                 // code to continue after authentication
+            }
+            public void onFailedUserAuthenticaion(String user){
+                Log.i(TAG, "Callback on failed user authentication for user "+user);
+
             }
         });
 

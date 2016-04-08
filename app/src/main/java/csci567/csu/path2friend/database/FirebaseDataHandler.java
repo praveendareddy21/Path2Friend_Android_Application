@@ -53,6 +53,8 @@ public class FirebaseDataHandler {
                     callback1.onSuccessfulUserAuthenticaion(userName);
                 } else {
                     Log.i(ACL, "search query for " + userName + " has returned false");
+                    callback1.onFailedUserAuthenticaion(userName);
+
                 }
             }
 
