@@ -192,6 +192,9 @@ public class LoginActivityFragment extends Fragment {
             public void onSuccessfulUserAuthenticaion(String user) {
                 Log.i(TAG, "Callback on successful user authentication for user "+user);
                 // code to continue after authentication
+                Intent intent = new Intent(getActivity(), MapActivity.class);
+                startActivity(intent);
+
             }
             public void onFailedUserAuthenticaion(String user){
                 Log.i(TAG, "Callback on failed user authentication for user "+user);

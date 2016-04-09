@@ -60,6 +60,8 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(TAG, sharedPreferences.getString(getString(R.string.emailID), ""));
 
             //Write code to load up the Map Screen here.
+            Intent intent = new Intent(this, MapActivity.class);
+            startActivity(intent);
         }
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
