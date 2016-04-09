@@ -190,20 +190,24 @@ public class LoginActivityFragment extends Fragment {
         fd.setUserAuthenticated(emailID.replace('.', ','), new DatabaseCallbackInterface() {
             @Override
             public void onSuccessfulUserAuthenticaion(String user) {
-                Log.i(TAG, "Callback on successful user authentication for user "+user);
+                Log.i(TAG, "Callback on successful user authentication for user " + user);
                 // code to continue after authentication
-                Intent intent = new Intent(getActivity(), MapActivity.class);
-                startActivity(intent);
+                loadMapActivity();
 
             }
             public void onFailedUserAuthenticaion(String user){
                 Log.i(TAG, "Callback on failed user authentication for user "+user);
-
+                loadMapActivity();
             }
         });
 
         return false;
         //Model.isUserAuthenticated();
+    }
+
+    void loadMapActivity() {
+        Intent intent = new Intent(getActivity(), MapActivity.class);
+        startActivity(intent);
     }
 
     void insertUser(String authToken, String emailID) {
