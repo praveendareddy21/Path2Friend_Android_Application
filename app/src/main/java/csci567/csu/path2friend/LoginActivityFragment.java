@@ -13,63 +13,34 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
-
-//import com.cloudant.sync.datastore.Attachment;
-//import com.cloudant.sync.datastore.BasicDocumentRevision;
-//import com.cloudant.sync.datastore.Datastore;
-//import com.cloudant.sync.datastore.DatastoreManager;
-//import com.cloudant.sync.datastore.DatastoreNotCreatedException;
-//import com.cloudant.sync.datastore.DocumentBody;
-//import com.cloudant.sync.datastore.DocumentBodyFactory;
-//import com.cloudant.sync.datastore.DocumentException;
-//import com.cloudant.sync.datastore.DocumentRevision;
-//import com.cloudant.sync.datastore.MutableDocumentRevision;
-//import com.cloudant.sync.replication.Replicator;
-//import com.cloudant.sync.replication.ReplicatorBuilder;
-import com.cloudant.sync.datastore.Datastore;
-import com.cloudant.sync.datastore.DatastoreManager;
-import com.cloudant.sync.datastore.DatastoreNotCreatedException;
-import com.cloudant.sync.datastore.DocumentBodyFactory;
-import com.cloudant.sync.datastore.DocumentException;
-import com.cloudant.sync.datastore.DocumentRevision;
-import com.cloudant.sync.datastore.MutableDocumentRevision;
-import com.cloudant.sync.replication.PullFilter;
-import com.cloudant.sync.replication.Replicator;
-import com.cloudant.sync.replication.ReplicatorBuilder;
 import com.firebase.client.Firebase;
-import com.google.common.util.concurrent.Service;
-import com.google.common.util.concurrent.ServiceManager;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.BMSClient;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Request;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.Response;
-import com.ibm.mobilefirstplatform.clientsdk.android.core.api.ResponseListener;
-import com.ibm.mobilefirstplatform.clientsdk.android.security.api.AuthorizationManager;
-import com.ibm.mobilefirstplatform.clientsdk.android.security.googleauthentication.GoogleAuthenticationManager;
-
-import org.json.JSONObject;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import csci567.csu.path2friend.database.FirebaseDataHandler;
-import csci567.csu.path2friend.database.Model;
 import csci567.csu.path2friend.database.UserData;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class LoginActivityFragment extends Fragment {
+public class LoginActivityFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener {
 
     static String TAG = "Login Activity Fragment:";
+    private static final int RC_SIGN_IN = 9001;
+    GoogleSignInOptions gso;
+    GoogleApiClient apiClient;
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
     public interface DatabaseCallbackInterface {
 
         void onSuccessfulUserAuthenticaion(String user);
@@ -89,18 +60,15 @@ public class LoginActivityFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
         ButterKnife.bind(this, rootView);
+
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+        apiClient = new GoogleApiClient.Builder(getActivity()).enableAutoManage(getActivity(), this).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
         return rootView;
     }
 
     @OnClick(R.id.sign_in_button)
     public void loginButtonPressed() {
-        //Initializing Bluemix
         Log.d(TAG, "Button Clicked");
-        try {
-            BMSClient.getInstance().initialize(getActivity().getApplicationContext(),
-                    "https://path2friend.mybluemix.net", "dfb91080-472f-450d-b40a-a9cfeb0bc3b7");
-
-            Log.d(TAG, "In BMS Client");
             if (ContextCompat.checkSelfPermission(getActivity(),
                     Manifest.permission.GET_ACCOUNTS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -117,9 +85,6 @@ public class LoginActivityFragment extends Fragment {
                             new String[]{Manifest.permission.GET_ACCOUNTS},
                             MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 }
-            }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -131,47 +96,12 @@ public class LoginActivityFragment extends Fragment {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    GoogleAuthenticationManager.getInstance().register(getActivity().getApplicationContext());
-                    Request request = new Request("/protected", Request.GET);
+                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(apiClient);
+                    startActivityForResult(signInIntent, RC_SIGN_IN);
+                    }
 
-                    request.send(getActivity(), new ResponseListener() {
-
-                        @Override
-                        public void onSuccess(Response response) {
-                            Log.d(TAG, "onSuccess :: " + response.getResponseText());
-                            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("csci567.csu.path2friend", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString(getString(R.string.authToken), AuthorizationManager.getInstance().getUserIdentity().getId());
-                            editor.putString(getString(R.string.emailID), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
-                            editor.commit();
-
-                            //take user to maps
-
-
-                                if (!checkIfUserExists(AuthorizationManager.getInstance().getUserIdentity().getDisplayName())) {
-                                    insertUser(AuthorizationManager.getInstance().getUserIdentity().getId(), AuthorizationManager.getInstance().getUserIdentity().getDisplayName());
-                                }
-                                else {
-                                    Log.d(TAG, "User exists, proceed with app.");
-                                }
-
-                        }
-
-                        @Override
-                        public void onFailure(Response response, Throwable t, JSONObject extendedInfo) {
-                            if (null != t) {
-                                Log.d(TAG, "onFailure :: " + t.getMessage());
-                            } else if (null != extendedInfo) {
-                                Log.d(TAG, "onFailure :: " + extendedInfo.toString());
-                            } else {
-                                Log.d(TAG, "onFailure :: " + response.getResponseText());
-                            }
-                        }
-                    });
-
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                else {
+                    Toast.makeText(getActivity(), "Please give us permission to access your account to login", Toast.LENGTH_LONG).show();
                 }
                 return;
             }
@@ -182,7 +112,7 @@ public class LoginActivityFragment extends Fragment {
         }
     }
 
-    boolean checkIfUserExists(String emailID) {
+    void checkIfUserExists(final String authToken, final String emailID) {
 
         Firebase.setAndroidContext(getActivity().getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
@@ -192,6 +122,7 @@ public class LoginActivityFragment extends Fragment {
             public void onSuccessfulUserAuthenticaion(String user) {
                 Log.i(TAG, "Callback on successful user authentication for user " + user);
                 // code to continue after authentication
+                insertUser(authToken, emailID);
                 loadMapActivity();
 
             }
@@ -200,9 +131,6 @@ public class LoginActivityFragment extends Fragment {
                 loadMapActivity();
             }
         });
-
-        return false;
-        //Model.isUserAuthenticated();
     }
 
     void loadMapActivity() {
@@ -219,5 +147,36 @@ public class LoginActivityFragment extends Fragment {
         UserData userData = new UserData(emailID, 1);
 
         fd.save_userdata(userData);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
+
+    private void handleSignInResult(GoogleSignInResult result) {
+        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+            Log.d(TAG, acct.getEmail());
+
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences("csci567.csu.path2friend", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(getString(R.string.authToken), acct.getId());
+            editor.putString(getString(R.string.emailID), acct.getEmail());
+            editor.commit();
+
+            checkIfUserExists(acct.getId(),acct.getEmail());
+
+        } else {
+            // Signed out, show unauthenticated UI.
+        }
     }
 }
