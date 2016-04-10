@@ -7,15 +7,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.util.Log;
 import android.view.Display;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
@@ -38,14 +32,6 @@ public class LoginActivity extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-//
-//        Bitmap bmp = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.p2f_bg), size.x, size.y, true);
-
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true;
-//        BitmapFactory.decodeResource(getResources(), R.drawable.p2f_bg, options);
-//        int imageHeight = options.outHeight;
-//        int imageWidth = options.outWidth;
 
         ImageView bgImageView = (ImageView)findViewById(R.id.bgImageView);
         bgImageView.setImageBitmap(decodeSampledBitmapFromResource(getResources(), R.drawable.p2f_bg, size.x/4, size.y/4));
@@ -61,46 +47,11 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MapActivity.class);
             startActivity(intent);
         }
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-//
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_login, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        GoogleAuthenticationManager.getInstance()
-//                .onActivityResultCalled(requestCode, resultCode, data);
     }
 
     public static int calculateInSampleSize(
