@@ -45,4 +45,5 @@ dependencies {
 //    compile group: 'com.cloudant', name: 'cloudant-sync-datastore-android-encryption', version:'latest.release'
     compile 'com.firebase:firebase-client-android:2.5.1+'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
+    compile 'com.google.android.gms:play-services-maps:8.3.0'
 }

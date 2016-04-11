@@ -24,6 +24,20 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapActivity"></activity>
+
+        <activity
+            android:name="csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity"
+            android:label="@string/title_activity_path_google_map" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyCucvoaodixKszPbos1rSIqLQZeVn4qUXk" />
     </application>
 
 </manifest>
