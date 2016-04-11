@@ -25,6 +25,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import csci567.csu.path2friend.database.FirebaseDataHandler;
 import csci567.csu.path2friend.database.UserData;
+import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -134,7 +135,7 @@ public class LoginActivityFragment extends Fragment implements GoogleApiClient.O
     }
 
     void loadMapActivity() {
-        Intent intent = new Intent(getActivity(), MapActivity.class);
+        Intent intent = new Intent(getActivity(), GoogleMapsPathActivity.class);
         startActivity(intent);
     }
 
