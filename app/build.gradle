@@ -9,9 +9,16 @@ repositories {
 }
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'andrioddebugkeystore'
+            keyPassword 'andriod'
+            storeFile file('C:/_WorkSpace\'/debug.keystore')
+            storePassword 'andriod'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
-
     defaultConfig {
         applicationId "csci567.csu.path2friend"
         minSdkVersion 21
@@ -25,7 +32,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     packagingOptions {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -40,9 +46,9 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
-//    compile group: 'com.ibm.mobilefirstplatform.clientsdk.android', name:'googleauthentication', version: '2.+', ext: 'aar', transitive: true
+    //    compile group: 'com.ibm.mobilefirstplatform.clientsdk.android', name:'googleauthentication', version: '2.+', ext: 'aar', transitive: true
     compile 'com.jakewharton:butterknife:7.0.1'
-//    compile group: 'com.cloudant', name: 'cloudant-sync-datastore-android-encryption', version:'latest.release'
+    //    compile group: 'com.cloudant', name: 'cloudant-sync-datastore-android-encryption', version:'latest.release'
     compile 'com.firebase:firebase-client-android:2.5.1+'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
     compile 'com.google.android.gms:play-services-maps:8.3.0'
