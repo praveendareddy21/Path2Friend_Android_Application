@@ -1,20 +1,38 @@
 package csci567.csu.path2friend.database;
 
-import android.util.Log;
 
-import csci567.csu.path2friend.database.UserData;
+
+import android.util.Log;
+import csci567.csu.path2friend.database.GeoLocation;
 
 
 public class Model {
 
     final static String ACL ="Model";
-    private static Long Latitude= null;
-    private static String Friend=null;
-    private static boolean test =false;
+
+    private static boolean isUserAuthenticated = false;
     private static UserData CurrentUserData;
     private static UserData CurrentFriendData;
 
-    private static boolean isUserAuthenticated = false;
+    private  static GeoLocation UserLoc = null;
+    private  static GeoLocation FriendLoc = null;
+
+    public static synchronized void setUserLoc(GeoLocation userLoc) {
+        UserLoc = userLoc;
+    }
+
+    public static synchronized GeoLocation getUserLoc() {
+        return UserLoc;
+    }
+
+    public static synchronized void setFriendLoc(GeoLocation friendLoc) {
+        FriendLoc = friendLoc;
+    }
+
+    public static synchronized GeoLocation getFriendLoc() {
+        return FriendLoc;
+    }
+
 
     public static synchronized  boolean isUserAuthenticated() {
         return isUserAuthenticated;
@@ -24,23 +42,6 @@ public class Model {
         isUserAuthenticated = isUserAuthenticated;
     }
 
-    public static synchronized void setFriend(String friend) {
-        Friend = friend;
-    }
-
-    public static synchronized  void setLatitude(Long latitude) {
-        Latitude = latitude;
-    }
-
-
-
-    public static synchronized Long getLatitude() {
-        return Latitude;
-    }
-
-    public static String getFriend() {
-        return Friend;
-    }
 
     public static synchronized void setCurrentUserData(UserData currentUserData) {
         CurrentUserData = currentUserData;
@@ -58,17 +59,12 @@ public class Model {
         return CurrentFriendData;
     }
 
-    public static synchronized void setTest(boolean test) {
-        test = test;
-    }
 
-    public static synchronized boolean isTest() {
-        return test;
-    }
     public static  synchronized void printModelState(){
-        Log.i(ACL, "current User : "+getCurrentUserData().getFullName());
-        Log.i(ACL, "current Friend User : "+getCurrentFriendData().getFullName());
-
+        if(getCurrentUserData()!= null)
+            Log.i(ACL, "current User : "+getCurrentUserData().getFullName());
+        if(getCurrentFriendData()!= null)
+            Log.i(ACL, "current Friend User : "+getCurrentFriendData().getFullName());
 
     }
 }
