@@ -9,6 +9,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import csci567.csu.path2friend.LoginActivityFragment.DatabaseCallbackInterface;
+import csci567.csu.path2friend.database.GeoLocation;
 
 
 import java.util.HashMap;
@@ -153,9 +154,6 @@ public class FirebaseDataHandler {
     }
 
 
-    public void is_key_stored_helper(boolean result){
-
-    }
 
     public boolean  search_by_key(String su) {
         Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
@@ -168,11 +166,11 @@ public class FirebaseDataHandler {
                 if (dataSnapshot.hasChild(userName)) {
                     Log.i(ACL, "search query for " + userName + " is true ");
                     print_method();
-                    is_key_stored_helper(true);
+
 
                 }
                 else{
-                    is_key_stored_helper(false);
+
                 }
             }
 
@@ -185,11 +183,45 @@ public class FirebaseDataHandler {
         return result;
 
     }
+
     public void setFriendData (String su){
+
+        Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+
+        Log.i(ACL, "tring with  user data" + su);
+        final String userName = su;
+
+        ref.orderByKey().startAt(su).endAt(su).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                UserData result = null;
+                Log.i(ACL, "Search by key for " + dataSnapshot.child(userName).getKey() + " is " + dataSnapshot.getValue());
+
+                result = dataSnapshot.child(userName).getValue(UserData.class);
+
+                if (result != null) {
+                    Log.i(ACL, "Value : " + result.toString());
+                    Model.setCurrentFriendData(result);
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+
+
+    }
+
+    public void setUserDatatoModel (String su){
         Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
 
 
-        Log.i(ACL, "tring with  user data" + su);
+        Log.i(ACL, "tring with  user data set user data to model" + su);
         final String userName = su;
 
 
@@ -204,9 +236,61 @@ public class FirebaseDataHandler {
 
                 if (result != null) {
                     Log.i(ACL, "Value : " + result.toString());
-                    Model.setCurrentFriendData(result);
-                    Model.printModelState();
+                    Model.setCurrentUserData(result);
                 }
+            }
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+
+
+    public void setLocation(String user, GeoLocation g){
+        Firebase setLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        setLocref.child(user).child("location").setValue(g);
+    }
+
+    public void  getLocation(String user) {
+        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+user);
+        Log.i(ACL, "Inside getLocation for "+user);
+        final String userName= user;
+
+        getLocref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                if("location".equals(dataSnapshot.getKey().toString())) {
+                    Log.i(ACL, "in On ChildAddedd fot getloc KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+                    GeoLocation g=dataSnapshot.getValue(GeoLocation.class);
+
+                    if(g != null) {
+                        Log.i(ACL, "in On ChildAddedd loc found  lat : " + g.latitude + " long : " + g.longitude);
+                    }
+
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if("location".equals(dataSnapshot.getKey().toString())) {
+                    Log.i(ACL, "in On Child Changed  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+                }
+
+                GeoLocation g=dataSnapshot.getValue(GeoLocation.class);
+                if(g != null) {
+                    Log.i(ACL, "in On ChildChanged lat : " + g.latitude + " long : " + g.longitude);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
             }
 
@@ -216,13 +300,7 @@ public class FirebaseDataHandler {
             }
         });
 
-
-
     }
 
-    public void push_to_users_data(UserData u){
-
-
-    }
 
 }
