@@ -10,6 +10,7 @@ import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import csci567.csu.path2friend.LoginActivityFragment.DatabaseCallbackInterface;
 import csci567.csu.path2friend.database.GeoLocation;
+import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity.DatabaseCallbackInterfaceForMap;
 
 
 import java.util.HashMap;
@@ -153,8 +154,6 @@ public class FirebaseDataHandler {
         Log.i(ACL, "just a method ");
     }
 
-
-
     public boolean  search_by_key(String su) {
         Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
         final String userName = su;
@@ -246,16 +245,16 @@ public class FirebaseDataHandler {
         });
     }
 
-
     public void setLocation(String user, GeoLocation g){
         Firebase setLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
         setLocref.child(user).child("location").setValue(g);
     }
 
-    public void  getLocation(String user) {
-        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+user);
-        Log.i(ACL, "Inside getLocation for "+user);
+    public void  getLocation(String user , String friend, final DatabaseCallbackInterfaceForMap callback) {
+        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
+        Log.i(ACL, "Inside getLocation for "+friend);
         final String userName= user;
+        final String friendName = friend;
 
         getLocref.addChildEventListener(new ChildEventListener() {
             @Override
@@ -267,6 +266,7 @@ public class FirebaseDataHandler {
 
                     if(g != null) {
                         Log.i(ACL, "in On ChildAddedd loc found  lat : " + g.latitude + " long : " + g.longitude);
+                        callback.onFriendLocationChange(userName, friendName, g);
                     }
 
                 }

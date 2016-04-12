@@ -34,7 +34,11 @@ package csci567.csu.path2friend.googlemapspath;
     import android.widget.Toast;
 
     import csci567.csu.path2friend.R;
+    import csci567.csu.path2friend.database.FirebaseDataHandler;
+    import csci567.csu.path2friend.database.GeoLocation;
     import csci567.csu.path2friend.database.Model;
+
+    import com.firebase.client.Firebase;
     import com.google.android.gms.maps.CameraUpdateFactory;
     import com.google.android.gms.maps.GoogleMap;
     import com.google.android.gms.maps.SupportMapFragment;
@@ -45,6 +49,11 @@ package csci567.csu.path2friend.googlemapspath;
 public class GoogleMapsPathActivity extends FragmentActivity {
 
 
+    public interface DatabaseCallbackInterfaceForMap {
+
+        void onFriendLocationChange(String user, String friend, GeoLocation newLoc);
+
+    }
     private  LatLng origin = null;
     private LatLng destination = null;
     final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
@@ -102,6 +111,21 @@ public class GoogleMapsPathActivity extends FragmentActivity {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
+        });
+
+
+    }
+    private void setFriendLocationChangeCallback(){
+        Firebase.setAndroidContext(this.getApplicationContext());
+        FirebaseDataHandler fd = new FirebaseDataHandler();
+
+        fd.getLocation("","",new DatabaseCallbackInterfaceForMap(){   /// add name and friend name
+           public void onFriendLocationChange(String user, String friend, GeoLocation newLoc){
+               Log.i(TAG, "Callback on friends location change");
+               Toast.makeText(getBaseContext(),
+                       " Friend's Location changed : Lat: " + newLoc.getLatitude() + " Lng: "
+                               + newLoc.getLongitude(), Toast.LENGTH_SHORT).show();
+           }
         });
 
 
