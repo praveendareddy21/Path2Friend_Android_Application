@@ -38,7 +38,10 @@ package csci567.csu.path2friend.googlemapspath;
     import csci567.csu.path2friend.database.GeoLocation;
     import csci567.csu.path2friend.database.Model;
 
+    import com.firebase.client.ChildEventListener;
+    import com.firebase.client.DataSnapshot;
     import com.firebase.client.Firebase;
+    import com.firebase.client.FirebaseError;
     import com.google.android.gms.maps.CameraUpdateFactory;
     import com.google.android.gms.maps.GoogleMap;
     import com.google.android.gms.maps.SupportMapFragment;
@@ -46,14 +49,10 @@ package csci567.csu.path2friend.googlemapspath;
     import com.google.android.gms.maps.model.MarkerOptions;
     import com.google.android.gms.maps.model.PolylineOptions;
 
-public class GoogleMapsPathActivity extends FragmentActivity {
+public class GoogleMapsPathActivity extends FragmentActivity implements DatabaseCallbackInterfaceForMap {
 
 
-    public interface DatabaseCallbackInterfaceForMap {
 
-        void onFriendLocationChange(String user, String friend, GeoLocation newLoc);
-
-    }
     private  LatLng origin = null;
     private LatLng destination = null;
     final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
@@ -112,21 +111,76 @@ public class GoogleMapsPathActivity extends FragmentActivity {
                         .setAction("Action", null).show();
             }
         });
+        setFriendLocationChangeCallback();
 
+    }
+
+    public void onFriendLocationChange(String user, String friend, GeoLocation newLoc){
+
+        Log.i(TAG, "Callback on friends location change");
+        Toast.makeText(getBaseContext(),
+                " Friend's Location changed : Lat: " + newLoc.getLatitude() + " Lng: "
+                        + newLoc.getLongitude(), Toast.LENGTH_SHORT).show();
 
     }
     private void setFriendLocationChangeCallback(){
         Firebase.setAndroidContext(this.getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
 
-        fd.getLocation("","",new DatabaseCallbackInterfaceForMap(){   /// add name and friend name
-           public void onFriendLocationChange(String user, String friend, GeoLocation newLoc){
-               Log.i(TAG, "Callback on friends location change");
-               Toast.makeText(getBaseContext(),
-                       " Friend's Location changed : Lat: " + newLoc.getLatitude() + " Lng: "
-                               + newLoc.getLongitude(), Toast.LENGTH_SHORT).show();
-           }
+        String user=null;
+        String friend = null;
+        /// assign user and friend to Model Class after authentication to avoid null references
+        try{
+        user= Model.getCurrentUserData().getFullName();
+        friend = Model.getCurrentFriendData().getFullName();
+        }
+        catch(NullPointerException e){
+            Log.e(TAG, "Null Pointer Exception while setLocationCallback "+ e.getMessage());
+        }
+
+
+        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
+        Log.i(TAG, "Inside getLocation in Google MapPath for "+friend);
+        final String userName= user;
+        final String friendName = friend;
+
+        getLocref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if("location".equals(dataSnapshot.getKey().toString())) {
+                    //Log.i(TAG, "in On Child Changed  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+
+
+                    GeoLocation g = dataSnapshot.getValue(GeoLocation.class);
+                    if (g != null) {
+                        Log.i(TAG, "in On ChildChanged lat : " + g.latitude + " long : " + g.longitude);
+                        onFriendLocationChange(userName, friendName, g);
+                    }
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
         });
+
+
 
 
     }
