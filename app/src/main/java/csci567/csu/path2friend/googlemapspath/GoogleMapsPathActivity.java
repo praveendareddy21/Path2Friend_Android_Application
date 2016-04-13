@@ -137,7 +137,10 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         catch(NullPointerException e){
             Log.e(TAG, "Null Pointer Exception while setLocationCallback "+ e.getMessage());
         }
-
+        finally {
+            user="James Bond";
+            friend ="Shane Bond";
+        }
 
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
         Log.i(TAG, "Inside getLocation in Google MapPath for "+friend);

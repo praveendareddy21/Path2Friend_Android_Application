@@ -10,7 +10,7 @@ import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import csci567.csu.path2friend.LoginActivityFragment.DatabaseCallbackInterface;
 import csci567.csu.path2friend.database.GeoLocation;
-import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity.DatabaseCallbackInterfaceForMap;
+//import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity.DatabaseCallbackInterfaceForMap;
 
 
 import java.util.HashMap;
@@ -250,7 +250,7 @@ public class FirebaseDataHandler {
         setLocref.child(user).child("location").setValue(g);
     }
 
-    public void  getLocation(String user , String friend, final DatabaseCallbackInterfaceForMap callback) {
+    public void  getLocation(String user , String friend) {
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
         Log.i(ACL, "Inside getLocation for "+friend);
         final String userName= user;
@@ -266,7 +266,7 @@ public class FirebaseDataHandler {
 
                     if(g != null) {
                         Log.i(ACL, "in On ChildAddedd loc found  lat : " + g.latitude + " long : " + g.longitude);
-                        callback.onFriendLocationChange(userName, friendName, g);
+                        //callback.onFriendLocationChange(userName, friendName, g);
                     }
 
                 }
