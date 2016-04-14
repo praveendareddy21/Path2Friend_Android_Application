@@ -9,14 +9,14 @@ repositories {
 }
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'andrioddebugkeystore'
-            keyPassword 'andriod'
-            storeFile file('C:/_WorkSpace\'/debug.keystore')
-            storePassword 'andriod'
-        }
-    }
+//    signingConfigs {
+//        config {
+//            keyAlias 'andrioddebugkeystore'
+//            keyPassword 'andriod'
+//            storeFile file('C:/_WorkSpace\'/debug.keystore')
+//            storePassword 'andriod'
+//        }
+//    }
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
     defaultConfig {

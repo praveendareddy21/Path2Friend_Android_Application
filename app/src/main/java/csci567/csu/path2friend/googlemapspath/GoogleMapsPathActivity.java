@@ -367,6 +367,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
         else if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             startLocationTracking();
+            googleMap.setMyLocationEnabled(true);
         }
     }
 
@@ -446,6 +447,10 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             Log.v(TAG, longitude);
             String latitude = "Latitude: " + loc.getLatitude();
             Log.v(TAG, latitude);
+
+            LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
+                    13));
         }
 
         @Override
