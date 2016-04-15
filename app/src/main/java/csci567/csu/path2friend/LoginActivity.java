@@ -16,6 +16,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity;
+
 public class LoginActivity extends AppCompatActivity {
 
     static String TAG = "Login Activity";
@@ -44,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(TAG, sharedPreferences.getString(getString(R.string.emailID), ""));
 
             //Write code to load up the Map Screen here.
-            Intent intent = new Intent(this, MapActivity.class);
+            Intent intent = new Intent(this, GoogleMapsPathActivity.class);
             startActivity(intent);
         }
     }

@@ -93,6 +93,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         options.position(origin);
         options.position(destination);
         googleMap.addMarker(options);
+
         String url = getMapsApiDirectionsUrl();
         ReadTask downloadTask = new ReadTask();
         downloadTask.execute(url);
@@ -449,8 +450,10 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             Log.v(TAG, latitude);
 
             LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            origin = currentLocation;
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
                     13));
+//            googleMap.clear();
         }
 
         @Override
