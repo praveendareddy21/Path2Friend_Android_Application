@@ -110,13 +110,13 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         fab1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
 
                 LayoutInflater li = LayoutInflater.from(getApplicationContext());
                 View addFriendAlert = li.inflate(R.layout.add_friend_alert_dialog, null);
 
-                AlertDialog.Builder alertDialogBuiler = new AlertDialog.Builder(getApplicationContext());
+                AlertDialog.Builder alertDialogBuiler = new AlertDialog.Builder(GoogleMapsPathActivity.this);
                 alertDialogBuiler.setView(addFriendAlert);
 
                 final EditText userInput = (EditText) addFriendAlert.findViewById(R.id.editTextDialogUserInput);
@@ -124,7 +124,13 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                 alertDialogBuiler.setCancelable(false).setPositiveButton("Add Friend", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.d(TAG, "Add friend: " + userInput.getText());
+                        String friendEmail = userInput.getText().toString();
+                        Log.d(TAG, "Add friend: " + friendEmail);
+
+                        if (friendEmail.length() == 0) {
+                            Toast.makeText(getBaseContext(),
+                                    "Please enter a proper email address", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -138,7 +144,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
             }
         });
-        setFriendLocationChangeCallback();
+//        setFriendLocationChangeCallback();
 
     }
 
