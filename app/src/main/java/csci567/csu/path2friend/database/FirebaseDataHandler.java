@@ -68,20 +68,25 @@ public class FirebaseDataHandler {
 
     }
 
-
     public void add_friend(String user,  String  friend){
 
 
         final Firebase userRef = this.myFirebaseRef.child("users");
-        final Firebase friendRef = this.myFirebaseRef.child("users").child(user).child("friends_list");
+        final Firebase userfriendRef = this.myFirebaseRef.child("users").child(user).child("friends_list");
+
+        final Firebase addFriendRef = this.myFirebaseRef.child("users").child(friend).child("friends_list");
+
         final String friendName = friend;
+        final String userName = user;
 
         userRef.orderByKey().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-               // Log.i(ACL, " key is " + dataSnapshot.getKey() + " value is " + dataSnapshot.getValue());
+                // Log.i(ACL, " key is " + dataSnapshot.getKey() + " value is " + dataSnapshot.getValue());
                 if (dataSnapshot.getKey() ==friendName ) {
-                    friendRef.child(friendName).setValue("");
+                    userfriendRef.child(friendName).setValue("");
+                    addFriendRef.child(userName).setValue("");
+
                     Log.i(ACL, "pushed the friend" + friendName + " to the friends list");
 
                 } else {
@@ -110,6 +115,59 @@ public class FirebaseDataHandler {
         });
         Log.i(ACL, "added the friend to friend list");
     }
+
+    public void get_friends_data(String user){
+
+
+
+        final Firebase userfriendRef = this.myFirebaseRef.child("users").child(user);
+
+        final String userName = user;
+
+        userfriendRef.orderByKey().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.i(ACL, " key is " + dataSnapshot.getKey() + " value is " + dataSnapshot.getValue());
+                if("friends_list".equals(dataSnapshot.getKey().toString())) {
+                    Log.i(ACL, "in On ChildAddedd Friend List  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+                    HashMap<String, String> FriendList=dataSnapshot.getValue(HashMap.class);
+
+                    if(FriendList != null) {
+                        Log.i(ACL, "in On ChildAddedd Friend list found " + FriendList.keySet().toString());
+
+
+
+                        //callback.onFriendLocationChange(userName, friendName, g);
+                    }
+
+                }
+            }
+
+
+
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        Log.i(ACL, "added the friend to friend list");
+    }
+
 
 
     public void search_friend(UserData u){
