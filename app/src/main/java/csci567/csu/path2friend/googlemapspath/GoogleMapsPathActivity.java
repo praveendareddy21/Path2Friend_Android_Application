@@ -30,7 +30,9 @@ package csci567.csu.path2friend.googlemapspath;
     import android.support.v4.app.FragmentActivity;
     import android.support.v4.content.ContextCompat;
     import android.util.Log;
+    import android.view.LayoutInflater;
     import android.view.View;
+    import android.widget.EditText;
     import android.widget.Toast;
 
     import csci567.csu.path2friend.R;
@@ -110,6 +112,30 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                LayoutInflater li = LayoutInflater.from(getApplicationContext());
+                View addFriendAlert = li.inflate(R.layout.add_friend_alert_dialog, null);
+
+                AlertDialog.Builder alertDialogBuiler = new AlertDialog.Builder(getApplicationContext());
+                alertDialogBuiler.setView(addFriendAlert);
+
+                final EditText userInput = (EditText) addFriendAlert.findViewById(R.id.editTextDialogUserInput);
+
+                alertDialogBuiler.setCancelable(false).setPositiveButton("Add Friend", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "Add friend: " + userInput.getText());
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                AlertDialog alert = alertDialogBuiler.create();
+                alert.show();
+
             }
         });
         setFriendLocationChangeCallback();
