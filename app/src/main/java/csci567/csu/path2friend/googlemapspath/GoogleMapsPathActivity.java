@@ -438,6 +438,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     startLocationTracking();
+                    googleMap.setMyLocationEnabled(true);
 
 
                 } else {
