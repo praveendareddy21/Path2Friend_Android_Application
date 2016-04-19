@@ -78,14 +78,14 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                 MODE_PRIVATE);
         Model.setCurrentUserData(new UserData(sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ','), 0));
 
-        if(origin == null){
-            origin = LOWER_MANHATTAN;
-        }
+//        if(origin == null){
+//            origin = LOWER_MANHATTAN;
+//        }
         //origin = LOWER_MANHATTAN;
        // destination = WALL_STREET;
-        if(destination == null){
-            destination = WALL_STREET;
-        }
+//        if(destination == null){
+//            destination = WALL_STREET;
+//        }
 
         setContentView(R.layout.google_maps_path);
         Log.i(TAG, "In on create of GoogleMapsPathActivity");
@@ -96,18 +96,17 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                 .findFragmentById(R.id.map);
         googleMap = fm.getMap();
 
-        MarkerOptions options = new MarkerOptions();
-        options.position(origin);
-        options.position(destination);
-        googleMap.addMarker(options);
+//        MarkerOptions options = new MarkerOptions();
+//        options.position(origin);
+//        options.position(destination);
+//        googleMap.addMarker(options);
+//
+//        String url = getMapsApiDirectionsUrl();
+//        ReadTask downloadTask = new ReadTask();
+//        downloadTask.execute(url);
 
-        String url = getMapsApiDirectionsUrl();
-        ReadTask downloadTask = new ReadTask();
-        downloadTask.execute(url);
-
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination,
-                13));
-        addMarkers();
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 13));
+//        addMarkers();
 
         handlePermissionForLocation();
 
@@ -139,7 +138,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
                         Firebase.setAndroidContext(getApplicationContext());
                         FirebaseDataHandler fd = new FirebaseDataHandler();
-                        fd.add_friend(Model.getCurrentUserData().getFullName() ,friendEmail);
+                        fd.add_friend(Model.getCurrentUserData().getFullName() ,friendEmail.replace('.', ','));
                         Model.setCurrentFriendData(new UserData("James Bond",0));
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -164,6 +163,17 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         Toast.makeText(getBaseContext(),
                 " Friend's Location changed : Lat: " + newLoc.getLatitude() + " Lng: "
                         + newLoc.getLongitude(), Toast.LENGTH_SHORT).show();
+
+        LatLng friendLocation = new LatLng(newLoc.getLatitude(), newLoc.getLongitude());
+        destination = friendLocation;
+        googleMap.clear();
+
+        String url = getMapsApiDirectionsUrl();
+        if (url != null) {
+            ReadTask downloadTask = new ReadTask();
+            downloadTask.execute(url);
+        }
+
 
     }
     private void setFriendLocationChangeCallback(){
@@ -232,20 +242,24 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
     }
 
     private String getMapsApiDirectionsUrl() {
-        String waypoints = "waypoints=optimize:true|"
-                + origin.latitude + "," + origin.longitude
-                + "|" + "|" + destination.latitude + ","
-                + destination.longitude;
+
+        if (origin != null && destination != null) {
+            String waypoints = "waypoints=optimize:true|"
+                    + origin.latitude + "," + origin.longitude
+                    + "|" + "|" + destination.latitude + ","
+                    + destination.longitude;
 
 
-        String OriDest = "origin="+origin.latitude+","+origin.longitude+"&destination="+destination.latitude+","+destination.longitude;
+            String OriDest = "origin="+origin.latitude+","+origin.longitude+"&destination="+destination.latitude+","+destination.longitude;
 
-        String sensor = "sensor=false";
-        String params = OriDest+"&%20"+ waypoints + "&" + sensor;
-        String output = "json";
-        String url = "https://maps.googleapis.com/maps/api/directions/"
-                + output + "?" + params;
-        return url;
+            String sensor = "sensor=false";
+            String params = OriDest+"&%20"+ waypoints + "&" + sensor;
+            String output = "json";
+            String url = "https://maps.googleapis.com/maps/api/directions/"
+                    + output + "?" + params;
+            return url;
+        }
+        return null;
     }
 
     private void addMarkers() {
@@ -505,8 +519,13 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                     13));
 
             fd.setLocation(Model.getCurrentUserData().getFullName(), new GeoLocation(loc.getLatitude(), loc.getLongitude()));
-//            googleMap.clear();
+            googleMap.clear();
 
+            String url = getMapsApiDirectionsUrl();
+            if (url != null) {
+                ReadTask downloadTask = new ReadTask();
+                downloadTask.execute(url);
+            }
         }
 
         @Override
