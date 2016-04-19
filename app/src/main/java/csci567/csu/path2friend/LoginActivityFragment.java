@@ -24,6 +24,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import csci567.csu.path2friend.database.FirebaseDataHandler;
+import csci567.csu.path2friend.database.Model;
 import csci567.csu.path2friend.database.UserData;
 import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity;
 
@@ -116,19 +117,20 @@ public class LoginActivityFragment extends Fragment implements GoogleApiClient.O
     void checkIfUserExists(final String authToken, final String emailID) {
 
         Firebase.setAndroidContext(getActivity().getApplicationContext());
-        FirebaseDataHandler fd = new FirebaseDataHandler();
+        final FirebaseDataHandler fd = new FirebaseDataHandler();
 
         fd.setUserAuthenticated(emailID.replace('.', ','), new DatabaseCallbackInterface() {
             @Override
             public void onSuccessfulUserAuthenticaion(String user) {
                 Log.i(TAG, "Callback on successful user authentication for user " + user);
                 // code to continue after authentication
-                insertUser(authToken, emailID);
+                fd.setUserDatatoModel(user);
                 loadMapActivity();
 
             }
             public void onFailedUserAuthenticaion(String user){
                 Log.i(TAG, "Callback on failed user authentication for user "+user);
+                insertUser(authToken, emailID);
                 loadMapActivity();
             }
         });
@@ -148,6 +150,7 @@ public class LoginActivityFragment extends Fragment implements GoogleApiClient.O
         UserData userData = new UserData(emailID, 1);
 
         fd.save_userdata(userData);
+        Model.setCurrentUserData(userData);
     }
 
     @Override

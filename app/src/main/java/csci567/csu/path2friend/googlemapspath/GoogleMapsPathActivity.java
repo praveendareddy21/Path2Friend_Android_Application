@@ -17,6 +17,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.content.Context;
     import android.content.DialogInterface;
     import android.content.Intent;
+    import android.content.SharedPreferences;
     import android.content.pm.PackageManager;
     import android.graphics.Color;
     import android.location.Location;
@@ -39,6 +40,7 @@ package csci567.csu.path2friend.googlemapspath;
     import csci567.csu.path2friend.database.FirebaseDataHandler;
     import csci567.csu.path2friend.database.GeoLocation;
     import csci567.csu.path2friend.database.Model;
+    import csci567.csu.path2friend.database.UserData;
 
     import com.firebase.client.ChildEventListener;
     import com.firebase.client.DataSnapshot;
@@ -72,6 +74,9 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
        // origin=new LatLng(Model.getUserLoc().latitude,Model.getUserLoc().longitude);
        // destination=new LatLng(Model.getFriendLoc().latitude,Model.getUserLoc().longitude);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
+                MODE_PRIVATE);
+        Model.setCurrentUserData(new UserData(sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ','), 0));
 
         if(origin == null){
             origin = LOWER_MANHATTAN;
@@ -131,6 +136,11 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                             Toast.makeText(getBaseContext(),
                                     "Please enter a proper email address", Toast.LENGTH_SHORT).show();
                         }
+
+                        Firebase.setAndroidContext(getApplicationContext());
+                        FirebaseDataHandler fd = new FirebaseDataHandler();
+                        fd.add_friend(Model.getCurrentUserData().getFullName() ,friendEmail);
+                        Model.setCurrentFriendData(new UserData("James Bond",0));
                     }
                 }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
@@ -144,7 +154,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
             }
         });
-//        setFriendLocationChangeCallback();
+        setFriendLocationChangeCallback();
 
     }
 
@@ -169,10 +179,10 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         }
         catch(NullPointerException e){
             Log.e(TAG, "Null Pointer Exception while setLocationCallback "+ e.getMessage());
-        }
-        finally {
             user="James Bond";
             friend ="Shane Bond";
+        }
+        finally {
         }
 
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
@@ -453,7 +463,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             buildAlertMessageNoGps();
         }
 
-        LocationListener locationListener = new MyLocationListener();
+        LocationListener locationListener = new MyLocationListener(getApplicationContext());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -469,10 +479,18 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
     }
     private class MyLocationListener implements LocationListener {
 
+        private Context context;
+        MyLocationListener(Context c) {
+            context=c;
+        }
+
         @Override
         public void onLocationChanged(Location loc) {
             //editLocation.setText("");
             //pb.setVisibility(View.INVISIBLE);
+            Firebase.setAndroidContext(context);
+            FirebaseDataHandler fd = new FirebaseDataHandler();
+
             Toast.makeText(getBaseContext(),
                     "Location changed: Lat: " + loc.getLatitude() + " Lng: "
                             + loc.getLongitude(), Toast.LENGTH_SHORT).show();
@@ -485,7 +503,10 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             origin = currentLocation;
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
                     13));
+
+            fd.setLocation(Model.getCurrentUserData().getFullName(), new GeoLocation(loc.getLatitude(), loc.getLongitude()));
 //            googleMap.clear();
+
         }
 
         @Override
