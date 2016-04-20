@@ -68,44 +68,39 @@ public class FirebaseDataHandler {
 
     }
 
+    public void add_to_friendlist(String user,  String  friend){
+        Log.i(ACL, " In add_to_friendlist method for add friend");
+        Firebase userRef = this.myFirebaseRef.child("users").child(user).child("friends_list").child(friend);
+        Firebase friendRef = this.myFirebaseRef.child("users").child(friend).child("friends_list").child(user);
+        userRef.setValue("");
+        friendRef.setValue("");
+        Log.i(ACL," set values to userRef and friendRef");
+
+    }
+
     public void add_friend(String user,  String  friend){
 
+        Log.i(ACL,"In add friend method ");
+        Firebase searchRef = this.myFirebaseRef.child("users");
+        final Firebase userRef = this.myFirebaseRef.child("users").child(user).child("friends_list");
+        final Firebase friendRef = this.myFirebaseRef.child("users").child(friend).child("friends_list");
 
-        final Firebase userRef = this.myFirebaseRef.child("users");
-        final Firebase userfriendRef = this.myFirebaseRef.child("users").child(user).child("friends_list");
-
-        final Firebase addFriendRef = this.myFirebaseRef.child("users").child(friend).child("friends_list");
-
-        final String friendName = friend;
         final String userName = user;
+        final String friendName = friend;
 
-        userRef.orderByKey().addChildEventListener(new ChildEventListener() {
+
+        searchRef.orderByKey().startAt(friend).endAt(friend).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                // Log.i(ACL, " key is " + dataSnapshot.getKey() + " value is " + dataSnapshot.getValue());
-                if (dataSnapshot.getKey() ==friendName ) {
-                    userfriendRef.child(friendName).setValue("");
-                    addFriendRef.child(userName).setValue("");
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i(ACL, " key is " + dataSnapshot.getKey() + " value is " + dataSnapshot.getValue());
+                if (dataSnapshot.hasChild(friendName)) {
+                    Log.i(ACL, "User " + friendName + " is authenticated. So, adding to friends list");
+                    add_to_friendlist(userName, friendName);
 
-                    Log.i(ACL, "pushed the friend" + friendName + " to the friends list");
 
                 } else {
-                    Log.i(ACL, "search query returns that friend is already in the friends list");
+                    Log.i(ACL, "User "+friendName+" does not exist. So, cannot add to friends list");
                 }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
@@ -113,7 +108,6 @@ public class FirebaseDataHandler {
 
             }
         });
-        Log.i(ACL, "added the friend to friend list");
     }
 
     public void get_friends_data(String user){
