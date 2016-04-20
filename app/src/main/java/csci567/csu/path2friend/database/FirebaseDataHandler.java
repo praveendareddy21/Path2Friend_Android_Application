@@ -10,6 +10,7 @@ import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import csci567.csu.path2friend.LoginActivityFragment.DatabaseCallbackInterface;
 import csci567.csu.path2friend.database.GeoLocation;
+import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity;
 //import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity.DatabaseCallbackInterfaceForMap;
 
 
@@ -110,28 +111,21 @@ public class FirebaseDataHandler {
         });
     }
 
-    public void get_friends_data(String user){
-
-
+    public void get_friends_data(String user, final GoogleMapsPathActivity.getFriendListCallbackInterface callback){
 
         final Firebase userfriendRef = this.myFirebaseRef.child("users").child(user);
-
         final String userName = user;
 
         userfriendRef.orderByKey().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.i(ACL, " key is " + dataSnapshot.getKey() + " value is " + dataSnapshot.getValue());
                 if("friends_list".equals(dataSnapshot.getKey().toString())) {
-                    Log.i(ACL, "in On ChildAddedd Friend List  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+                    //Log.i(ACL, "in On ChildAddedd Friend List  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
                     HashMap<String, String> FriendList=dataSnapshot.getValue(HashMap.class);
 
                     if(FriendList != null) {
                         Log.i(ACL, "in On ChildAddedd Friend list found " + FriendList.keySet().toString());
-
-
-
-                        //callback.onFriendLocationChange(userName, friendName, g);
+                        callback.onRetrievingFriendList(userName, FriendList.keySet());
                     }
 
                 }

@@ -9,6 +9,7 @@ package csci567.csu.path2friend.googlemapspath;
     import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
+    import java.util.Set;
 
     import org.json.JSONObject;
 
@@ -55,6 +56,10 @@ package csci567.csu.path2friend.googlemapspath;
 
 public class GoogleMapsPathActivity extends FragmentActivity implements DatabaseCallbackInterfaceForMap {
 
+    public interface getFriendListCallbackInterface {
+
+        void onRetrievingFriendList(String user, Set<String> friendList);
+    }
 
 
     private  LatLng origin = null;
@@ -153,7 +158,22 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
             }
         });
-        setFriendLocationChangeCallback();
+        //setFriendLocationChangeCallback(<user>, <friend>);
+        getUsersFriendlist(Model.getCurrentUserData().getFullName());
+
+    }
+    private void getUsersFriendlist(String user){
+        Firebase.setAndroidContext(this.getApplicationContext());
+        FirebaseDataHandler fd = new FirebaseDataHandler();
+        fd.get_friends_data(user, new getFriendListCallbackInterface() {
+            @Override
+            public void onRetrievingFriendList(String user, Set<String> friendList) {
+                for (String s : friendList) {
+                    if(!s.equals("default"))
+                    Log.i(TAG, "Friend list of "+user+ " has "+s);
+                }
+            }
+        });
 
     }
 
@@ -176,23 +196,23 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
 
     }
-    private void setFriendLocationChangeCallback(){
+
+    private void setFriendLocationChangeCallback(String user, String friend){
         Firebase.setAndroidContext(this.getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
 
-        String user=null;
-        String friend = null;
-        /// assign user and friend to Model Class after authentication to avoid null references
         try{
         user= Model.getCurrentUserData().getFullName();
-        friend = Model.getCurrentFriendData().getFullName();
         }
         catch(NullPointerException e){
-            Log.e(TAG, "Null Pointer Exception while setLocationCallback "+ e.getMessage());
-            user="James Bond";
-            friend ="Shane Bond";
+            Log.e(TAG, "Null Pointer Exception while getting userData from Model "+ e.getMessage());
         }
-        finally {
+
+        try{
+            friend = Model.getCurrentFriendData().getFullName();
+        }
+        catch(NullPointerException e){
+            Log.e(TAG, "Null Pointer Exception while getting currentFriendData from Model "+ e.getMessage());
         }
 
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
@@ -203,15 +223,11 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         getLocref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 if("location".equals(dataSnapshot.getKey().toString())) {
-                    //Log.i(TAG, "in On Child Changed  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
-
-
                     GeoLocation g = dataSnapshot.getValue(GeoLocation.class);
                     if (g != null) {
                         Log.i(TAG, "in On ChildChanged lat : " + g.latitude + " long : " + g.longitude);
@@ -222,23 +238,14 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
             }
-
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
             }
-
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-
             }
         });
-
-
-
-
     }
 
     private String getMapsApiDirectionsUrl() {
@@ -291,7 +298,6 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             new ParserTask().execute(result);
-            //new getData().execute("no shit");
         }
     }
 
@@ -345,55 +351,6 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         }
     }
 
-    private class getData extends AsyncTask<String, String, String> {
-
-        HttpURLConnection urlConnection;
-
-        @Override
-        protected String doInBackground(String... args) {
-
-
-            String username = args[0];
-            StringBuilder result = new StringBuilder();
-
-            try {
-                URL url = new URL("https://brilliant-inferno-6550.firebaseio.com/users/"+username+".json");
-                urlConnection = (HttpURLConnection) url.openConnection();
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-
-            }catch( IOException ioe) {
-
-                Log.i("GetData", "IOException Error Messsage  : "+ioe.getMessage());
-            }
-            catch( Exception e) {
-                e.printStackTrace();
-                Log.i("GetData", "Error : "+e.getMessage());
-            }
-            finally {
-                urlConnection.disconnect();
-            }
-
-            if(result.equals("")){
-                Log.i("GetData", " Result is null as expected ");
-            }
-            return result.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Log.i("GetData", " result from url : " + result + " length :"+result.length());
-            //Do something with the JSON string
-
-        }
-
-    }
 
 
     void handlePermissionForLocation() {
