@@ -159,6 +159,8 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             }
         });
         //setFriendLocationChangeCallback(<user>, <friend>);
+        setFriendLocationChangeCallback(Model.getCurrentUserData().getFullName() , "mohit,athwani@gmail,com");
+
         getUsersFriendlist(Model.getCurrentUserData().getFullName());
 
     }
