@@ -48,6 +48,7 @@ package csci567.csu.path2friend.googlemapspath;
     import com.google.android.gms.maps.model.MarkerOptions;
     import com.google.android.gms.maps.model.PolylineOptions;
 
+
 public class GoogleMapsPathActivity extends FragmentActivity {
 
     public interface getFriendListCallbackInterface {
@@ -105,17 +106,21 @@ public class GoogleMapsPathActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.google_maps_path);
         this._user= getIntent().getStringExtra("user_name");
         setUserLocationCallback();
 
-       // origin=new LatLng(Model.getUserLoc().latitude,Model.getUserLoc().longitude);
-       // destination=new LatLng(Model.getFriendLoc().latitude,Model.getUserLoc().longitude);
+        Button share_loc_button= (Button)findViewById(R.id.startSharingButton);
+        share_loc_button.setOnClickListener(new View.OnClickListener(){
 
-        //SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend", MODE_PRIVATE);
-        //Model.setCurrentUserData(new UserData(sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ','), 0));
+            @Override
+            public void onClick(View v) {
+                getUsersFriendlist(_user);
+            }
+        });
 
 
-        setContentView(R.layout.google_maps_path);
+
         Log.i(TAG, "In on create of GoogleMapsPathActivity");
 
 
@@ -184,7 +189,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         //setFriendLocationChangeCallback(<user>, <friend>);
         //setFriendLocationChangeCallback(Model.getCurrentUserData().getFullName() , "mohit,athwani@gmail,com");
 
-        getUsersFriendlist(_user.replace('.', ','));
+
         Log.i(TAG," Current User from Intent is "+_user);
 
     }
@@ -286,6 +291,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
             @Override
             public void onRetrievingLocation(String user, GeoLocation g) {
                 origin=new LatLng(g.latitude,g.longitude);
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 13));
 
             }
         });
@@ -398,6 +404,8 @@ public class GoogleMapsPathActivity extends FragmentActivity {
                         MY_PERMISSIONS_REQUEST_FINE_LOCATION);
 
                 //write code to fetch location here.
+                if(origin != null)
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 13));
             }
         }
 
@@ -501,10 +509,21 @@ public class GoogleMapsPathActivity extends FragmentActivity {
             fd.setLocation(_user, new GeoLocation(loc.getLatitude(), loc.getLongitude()));
             googleMap.clear();
 
-            String url = getMapsApiDirectionsUrl();
+                       String url = getMapsApiDirectionsUrl();
             if (url != null) {
+                Log.i(TAG, " url on Friend location callback is "+ url);
                 ReadTask downloadTask = new ReadTask();
                 downloadTask.execute(url);
+                MarkerOptions options = new MarkerOptions();
+                options.position(origin);
+                options.position(destination);
+                googleMap.addMarker(options);
+
+
+
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin,
+                        13));
+                addMarkers();
             }
         }
 
