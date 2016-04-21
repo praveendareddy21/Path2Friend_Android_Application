@@ -294,7 +294,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
             public void onRetrievingLocation(String user, GeoLocation g) {
                 origin=new LatLng(g.latitude,g.longitude);
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 13));
-                googleMap.setMyLocationEnabled(true);
+//                googleMap.setMyLocationEnabled(true);
             }
         });
     }
