@@ -106,6 +106,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this._user= getIntent().getStringExtra("user_name");
+        setUserLocationCallback();
 
        // origin=new LatLng(Model.getUserLoc().latitude,Model.getUserLoc().longitude);
        // destination=new LatLng(Model.getFriendLoc().latitude,Model.getUserLoc().longitude);
@@ -211,10 +212,22 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         destination = friendLocation;
         googleMap.clear();
 
+
         String url = getMapsApiDirectionsUrl();
         if (url != null) {
+            Log.i(TAG, " url on Friend location callback is "+ url);
             ReadTask downloadTask = new ReadTask();
             downloadTask.execute(url);
+            MarkerOptions options = new MarkerOptions();
+            options.position(origin);
+            options.position(destination);
+            googleMap.addMarker(options);
+
+
+
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin,
+                    13));
+            addMarkers();
         }
     }
 
@@ -273,6 +286,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
             @Override
             public void onRetrievingLocation(String user, GeoLocation g) {
                 origin=new LatLng(g.latitude,g.longitude);
+
             }
         });
     }
@@ -283,9 +297,9 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         if (googleMap != null) {
 
             googleMap.addMarker(new MarkerOptions().position(origin)
-                    .title("Marker"));
+                    .title("origin"));
             googleMap.addMarker(new MarkerOptions().position(destination)
-                    .title("Third Point"));
+                    .title("destination"));
         }
     }
 
