@@ -107,7 +107,9 @@ public class GoogleMapsPathActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.google_maps_path);
-        this._user= getIntent().getStringExtra("user_name");
+        SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
+                MODE_PRIVATE);
+        this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
         setUserLocationCallback();
 
         Button share_loc_button= (Button)findViewById(R.id.startSharingButton);
@@ -510,7 +512,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
             googleMap.clear();
 
                        String url = getMapsApiDirectionsUrl();
-            if (url != null) {
+            if (url != null && destination != null) {
                 Log.i(TAG, " url on Friend location callback is "+ url);
                 ReadTask downloadTask = new ReadTask();
                 downloadTask.execute(url);
