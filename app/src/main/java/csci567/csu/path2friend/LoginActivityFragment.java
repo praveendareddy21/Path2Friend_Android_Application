@@ -125,19 +125,20 @@ public class LoginActivityFragment extends Fragment implements GoogleApiClient.O
                 Log.i(TAG, "Callback on successful user authentication for user " + user);
                 // code to continue after authentication
                 fd.setUserDatatoModel(user);
-                loadMapActivity();
+                loadMapActivity(user);
 
             }
             public void onFailedUserAuthenticaion(String user){
                 Log.i(TAG, "Callback on failed user authentication for user "+user);
                 insertUser(authToken, emailID);
-                loadMapActivity();
+                loadMapActivity(user);
             }
         });
     }
 
-    void loadMapActivity() {
+    void loadMapActivity(String user_name) {
         Intent intent = new Intent(getActivity(), GoogleMapsPathActivity.class);
+        intent.putExtra("user_name", user_name);
         startActivity(intent);
     }
 

@@ -11,7 +11,7 @@ import com.firebase.client.ValueEventListener;
 import csci567.csu.path2friend.LoginActivityFragment.DatabaseCallbackInterface;
 import csci567.csu.path2friend.database.GeoLocation;
 import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity;
-//import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity.DatabaseCallbackInterfaceForMap;
+
 
 
 import java.util.HashMap;
@@ -296,11 +296,10 @@ public class FirebaseDataHandler {
         setLocref.child(user).child("location").setValue(g);
     }
 
-    public void  getLocation(String user , String friend) {
-        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
-        Log.i(ACL, "Inside getLocation for "+friend);
+    public void  getLocation(String user, final GoogleMapsPathActivity.getLocationCallbackInterface callback) {
+        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+user);
+        Log.i(ACL, "Inside getLocation for user :  "+user);
         final String userName= user;
-        final String friendName = friend;
 
         getLocref.addChildEventListener(new ChildEventListener() {
             @Override
@@ -312,22 +311,14 @@ public class FirebaseDataHandler {
 
                     if(g != null) {
                         Log.i(ACL, "in On ChildAddedd loc found  lat : " + g.latitude + " long : " + g.longitude);
-                        //callback.onFriendLocationChange(userName, friendName, g);
+                        callback.onRetrievingLocation(userName, g);
                     }
-
                 }
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                if("location".equals(dataSnapshot.getKey().toString())) {
-                    Log.i(ACL, "in On Child Changed  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
-                }
 
-                GeoLocation g=dataSnapshot.getValue(GeoLocation.class);
-                if(g != null) {
-                    Log.i(ACL, "in On ChildChanged lat : " + g.latitude + " long : " + g.longitude);
-                }
             }
 
             @Override

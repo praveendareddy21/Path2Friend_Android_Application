@@ -1,20 +1,12 @@
 package csci567.csu.path2friend.googlemapspath;
-    import java.io.BufferedInputStream;
-    import java.io.BufferedReader;
-    import java.io.IOException;
-    import java.io.InputStream;
-    import java.io.InputStreamReader;
-    import java.net.HttpURLConnection;
-    import java.net.URL;
     import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
     import java.util.Set;
-
     import org.json.JSONObject;
-
     import android.Manifest;
     import android.app.AlertDialog;
+    import android.app.Dialog;
     import android.content.Context;
     import android.content.DialogInterface;
     import android.content.Intent;
@@ -34,7 +26,9 @@ package csci567.csu.path2friend.googlemapspath;
     import android.util.Log;
     import android.view.LayoutInflater;
     import android.view.View;
+    import android.widget.Button;
     import android.widget.EditText;
+    import android.widget.NumberPicker;
     import android.widget.Toast;
 
     import csci567.csu.path2friend.R;
@@ -54,16 +48,19 @@ package csci567.csu.path2friend.googlemapspath;
     import com.google.android.gms.maps.model.MarkerOptions;
     import com.google.android.gms.maps.model.PolylineOptions;
 
-public class GoogleMapsPathActivity extends FragmentActivity implements DatabaseCallbackInterfaceForMap {
+public class GoogleMapsPathActivity extends FragmentActivity {
 
     public interface getFriendListCallbackInterface {
-
         void onRetrievingFriendList(String user, Set<String> friendList);
     }
-
+    public interface getLocationCallbackInterface {
+        void onRetrievingLocation(String user, GeoLocation g);
+    }
 
     private  LatLng origin = null;
     private LatLng destination = null;
+    private String _user = null;
+    private String _friend= null;
     final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     private static final LatLng LOWER_MANHATTAN = new LatLng(40.722543, -73.998585);
@@ -72,33 +69,57 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
     GoogleMap googleMap;
     final String TAG = "GoogleMapsPathActivity";
 
+    public void callNumberPicker(String [] friends){
+
+        int options= friends.length;
+        final String [] friends_list= friends;
+        final Dialog d = new Dialog(GoogleMapsPathActivity.this);
+        d.setTitle("NumberPicker");
+        d.setContentView(R.layout.dialog);
+        Button b1 = (Button) d.findViewById(R.id.button1);
+        Button b2 = (Button) d.findViewById(R.id.button2);
+        final NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
+        //np.setMaxValue(100);
+        //np.setMinValue(0);
+        np.setMinValue(0);
+        np.setMaxValue(options-1);
+        np.setDisplayedValues( friends );
+
+        np.setWrapSelectorWheel(false);
+        np.setOnValueChangedListener( new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                Log.i(TAG, " Selected number is "+newVal);
+            }
+        });
+        b1.setOnClickListener(new View.OnClickListener()
+        {@Override public void onClick(View v) {
+                Log.i(TAG, " Value set as "+np.getValue());
+                setFriendLocationChangeCallback(_user , friends_list[np.getValue()]);
+                d.dismiss();
+            }});
+
+        b2.setOnClickListener(new View.OnClickListener()
+        {@Override public void onClick(View v) {d.dismiss();}});d.show();}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this._user= getIntent().getStringExtra("user_name");
 
        // origin=new LatLng(Model.getUserLoc().latitude,Model.getUserLoc().longitude);
        // destination=new LatLng(Model.getFriendLoc().latitude,Model.getUserLoc().longitude);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
-                MODE_PRIVATE);
-        Model.setCurrentUserData(new UserData(sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ','), 0));
+        //SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend", MODE_PRIVATE);
+        //Model.setCurrentUserData(new UserData(sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ','), 0));
 
-//        if(origin == null){
-//            origin = LOWER_MANHATTAN;
-//        }
-        //origin = LOWER_MANHATTAN;
-       // destination = WALL_STREET;
-//        if(destination == null){
-//            destination = WALL_STREET;
-//        }
 
         setContentView(R.layout.google_maps_path);
         Log.i(TAG, "In on create of GoogleMapsPathActivity");
 
 
 
-       SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+       SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         googleMap = fm.getMap();
 
 //        MarkerOptions options = new MarkerOptions();
@@ -122,46 +143,48 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
 
-                LayoutInflater li = LayoutInflater.from(getApplicationContext());
-                View addFriendAlert = li.inflate(R.layout.add_friend_alert_dialog, null);
+        LayoutInflater li = LayoutInflater.from(getApplicationContext());
+        View addFriendAlert = li.inflate(R.layout.add_friend_alert_dialog, null);
 
-                AlertDialog.Builder alertDialogBuiler = new AlertDialog.Builder(GoogleMapsPathActivity.this);
-                alertDialogBuiler.setView(addFriendAlert);
+        AlertDialog.Builder alertDialogBuiler = new AlertDialog.Builder(GoogleMapsPathActivity.this);
+        alertDialogBuiler.setView(addFriendAlert);
 
-                final EditText userInput = (EditText) addFriendAlert.findViewById(R.id.editTextDialogUserInput);
+        final EditText userInput = (EditText) addFriendAlert.findViewById(R.id.editTextDialogUserInput);
 
-                alertDialogBuiler.setCancelable(false).setPositiveButton("Add Friend", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String friendEmail = userInput.getText().toString();
-                        Log.d(TAG, "Add friend: " + friendEmail);
+        alertDialogBuiler.setCancelable(false).setPositiveButton("Add Friend", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String friendEmail = userInput.getText().toString();
+                Log.d(TAG, "Add friend: " + friendEmail);
 
-                        if (friendEmail.length() == 0) {
-                            Toast.makeText(getBaseContext(),
-                                    "Please enter a proper email address", Toast.LENGTH_SHORT).show();
-                        }
+                if (friendEmail.length() == 0) {
+                    Toast.makeText(getBaseContext(),
+                            "Please enter a proper email address", Toast.LENGTH_SHORT).show();
+                }
 
-                        Firebase.setAndroidContext(getApplicationContext());
-                        FirebaseDataHandler fd = new FirebaseDataHandler();
-                        fd.add_friend(Model.getCurrentUserData().getFullName() ,friendEmail.replace('.', ','));
-                        Model.setCurrentFriendData(new UserData("James Bond",0));
-                    }
-                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+                Firebase.setAndroidContext(getApplicationContext());
+                FirebaseDataHandler fd = new FirebaseDataHandler();
 
-                AlertDialog alert = alertDialogBuiler.create();
-                alert.show();
+                fd.add_friend(_user ,friendEmail.replace('.', ','));
 
             }
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
         });
-        //setFriendLocationChangeCallback(<user>, <friend>);
-        setFriendLocationChangeCallback(Model.getCurrentUserData().getFullName() , "mohit,athwani@gmail,com");
 
-        getUsersFriendlist(Model.getCurrentUserData().getFullName());
+        AlertDialog alert = alertDialogBuiler.create();
+        alert.show();
+
+        }
+    });
+        //setFriendLocationChangeCallback(<user>, <friend>);
+        //setFriendLocationChangeCallback(Model.getCurrentUserData().getFullName() , "mohit,athwani@gmail,com");
+
+        getUsersFriendlist(_user.replace('.', ','));
+        Log.i(TAG," Current User from Intent is "+_user);
 
     }
     private void getUsersFriendlist(String user){
@@ -170,10 +193,8 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         fd.get_friends_data(user, new getFriendListCallbackInterface() {
             @Override
             public void onRetrievingFriendList(String user, Set<String> friendList) {
-                for (String s : friendList) {
-                    if(!s.equals("default"))
-                    Log.i(TAG, "Friend list of "+user+ " has "+s);
-                }
+                String[] friends = friendList.toArray(new String[friendList.size()]);
+                callNumberPicker(friends);
             }
         });
 
@@ -195,30 +216,13 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             ReadTask downloadTask = new ReadTask();
             downloadTask.execute(url);
         }
-
-
     }
 
     private void setFriendLocationChangeCallback(String user, String friend){
         Firebase.setAndroidContext(this.getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
-
-        try{
-        user= Model.getCurrentUserData().getFullName();
-        }
-        catch(NullPointerException e){
-            Log.e(TAG, "Null Pointer Exception while getting userData from Model "+ e.getMessage());
-        }
-
-        try{
-            friend = Model.getCurrentFriendData().getFullName();
-        }
-        catch(NullPointerException e){
-            Log.e(TAG, "Null Pointer Exception while getting currentFriendData from Model "+ e.getMessage());
-        }
-
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
-        Log.i(TAG, "Inside getLocation in Google MapPath for "+friend);
+        Log.i(TAG, "Inside setFriendLocationChangeCallback  in Google MapPath for "+friend);
         final String userName= user;
         final String friendName = friend;
 
@@ -237,17 +241,9 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
                     }
                 }
             }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-            }
-        });
+            @Override public void onChildRemoved(DataSnapshot dataSnapshot) {}
+            @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+            @Override public void onCancelled(FirebaseError firebaseError) {}});
     }
 
     private String getMapsApiDirectionsUrl() {
@@ -269,6 +265,16 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             return url;
         }
         return null;
+    }
+    private void setUserLocationCallback(){
+        Firebase.setAndroidContext(this.getApplicationContext());
+        FirebaseDataHandler fd = new FirebaseDataHandler();
+        fd.getLocation(_user, new getLocationCallbackInterface() {
+            @Override
+            public void onRetrievingLocation(String user, GeoLocation g) {
+                origin=new LatLng(g.latitude,g.longitude);
+            }
+        });
     }
 
     private void addMarkers() {
@@ -478,7 +484,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
                     13));
 
-            fd.setLocation(Model.getCurrentUserData().getFullName(), new GeoLocation(loc.getLatitude(), loc.getLongitude()));
+            fd.setLocation(_user, new GeoLocation(loc.getLatitude(), loc.getLongitude()));
             googleMap.clear();
 
             String url = getMapsApiDirectionsUrl();
@@ -497,7 +503,5 @@ public class GoogleMapsPathActivity extends FragmentActivity implements Database
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {}
     }
-
-
 
 }
