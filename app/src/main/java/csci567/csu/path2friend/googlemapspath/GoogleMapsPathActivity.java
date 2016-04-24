@@ -63,15 +63,13 @@ public class GoogleMapsPathActivity extends FragmentActivity {
     private String _user = null;
     private String _friend= null;
     final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
-
-    private static final LatLng LOWER_MANHATTAN = new LatLng(40.722543, -73.998585);
-    private static final LatLng WALL_STREET = new LatLng(40.7064, -74.0094);
+    private FirebaseDataHandler _fd= null;
 
     GoogleMap googleMap;
     final String TAG = "GoogleMapsPathActivity";
 
     public void callNumberPicker(String [] friends){
-
+        Log.i(TAG, "Starting Number Picker for selecting friend out of friends list");
         int options= friends.length;
         final String [] friends_list= friends;
         final Dialog d = new Dialog(GoogleMapsPathActivity.this);
@@ -80,8 +78,6 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         Button b1 = (Button) d.findViewById(R.id.button1);
         Button b2 = (Button) d.findViewById(R.id.button2);
         final NumberPicker np = (NumberPicker) d.findViewById(R.id.numberPicker1);
-        //np.setMaxValue(100);
-        //np.setMinValue(0);
         np.setMinValue(0);
         np.setMaxValue(options-1);
         np.setDisplayedValues( friends );
@@ -96,12 +92,32 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         b1.setOnClickListener(new View.OnClickListener()
         {@Override public void onClick(View v) {
                 Log.i(TAG, " Value set as "+np.getValue());
-                setFriendLocationChangeCallback(_user , friends_list[np.getValue()]);
+                _friend=friends_list[np.getValue()];
+                setFriendLocationCallback();
+                setFriendLocationChangeCallback(_user , _friend);
                 d.dismiss();
             }});
 
         b2.setOnClickListener(new View.OnClickListener()
         {@Override public void onClick(View v) {d.dismiss();}});d.show();}
+
+    private void  refreshMap(){
+        googleMap.clear();
+        String url = getMapsApiDirectionsUrl();
+        if (url != null) {
+            Log.i(TAG, " url in refresh Map is "+ url);
+            ReadTask downloadTask = new ReadTask();
+            downloadTask.execute(url);
+            MarkerOptions options = new MarkerOptions();
+            options.position(origin);
+            options.position(destination);
+            googleMap.addMarker(options);
+
+
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+            addMarkers();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +126,12 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
                 MODE_PRIVATE);
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
+
+
+
+        Firebase.setAndroidContext(this.getApplicationContext());
+        _fd = new FirebaseDataHandler();
+
         setUserLocationCallback();
 
         Button share_loc_button= (Button)findViewById(R.id.startSharingButton);
@@ -129,18 +151,6 @@ public class GoogleMapsPathActivity extends FragmentActivity {
 
        SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         googleMap = fm.getMap();
-
-//        MarkerOptions options = new MarkerOptions();
-//        options.position(origin);
-//        options.position(destination);
-//        googleMap.addMarker(options);
-//
-//        String url = getMapsApiDirectionsUrl();
-//        ReadTask downloadTask = new ReadTask();
-//        downloadTask.execute(url);
-
-//        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination, 13));
-//        addMarkers();
 
         handlePermissionForLocation();
 
@@ -170,10 +180,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
                             "Please enter a proper email address", Toast.LENGTH_SHORT).show();
                 }
 
-                Firebase.setAndroidContext(getApplicationContext());
-                FirebaseDataHandler fd = new FirebaseDataHandler();
-
-                fd.add_friend(_user ,friendEmail.replace('.', ','));
+                _fd.add_friend(_user ,friendEmail.replace('.', ','));
 
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -188,17 +195,10 @@ public class GoogleMapsPathActivity extends FragmentActivity {
 
         }
     });
-        //setFriendLocationChangeCallback(<user>, <friend>);
-        //setFriendLocationChangeCallback(Model.getCurrentUserData().getFullName() , "mohit,athwani@gmail,com");
-
-
-        Log.i(TAG," Current User from Intent is "+_user);
 
     }
     private void getUsersFriendlist(String user){
-        Firebase.setAndroidContext(this.getApplicationContext());
-        FirebaseDataHandler fd = new FirebaseDataHandler();
-        fd.get_friends_data(user, new getFriendListCallbackInterface() {
+       _fd.get_friends_data(user, new getFriendListCallbackInterface() {
             @Override
             public void onRetrievingFriendList(String user, Set<String> friendList) {
                 String[] friends = friendList.toArray(new String[friendList.size()]);
@@ -217,29 +217,10 @@ public class GoogleMapsPathActivity extends FragmentActivity {
 
         LatLng friendLocation = new LatLng(newLoc.getLatitude(), newLoc.getLongitude());
         destination = friendLocation;
-        googleMap.clear();
-
-
-        String url = getMapsApiDirectionsUrl();
-        if (url != null) {
-            Log.i(TAG, " url on Friend location callback is "+ url);
-            ReadTask downloadTask = new ReadTask();
-            downloadTask.execute(url);
-            MarkerOptions options = new MarkerOptions();
-            options.position(origin);
-            options.position(destination);
-            googleMap.addMarker(options);
-
-
-
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin,
-                    13));
-            addMarkers();
-        }
+        refreshMap();
     }
 
     private void setFriendLocationChangeCallback(String user, String friend){
-        Firebase.setAndroidContext(this.getApplicationContext());
         FirebaseDataHandler fd = new FirebaseDataHandler();
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
         Log.i(TAG, "Inside setFriendLocationChangeCallback  in Google MapPath for "+friend);
@@ -276,7 +257,6 @@ public class GoogleMapsPathActivity extends FragmentActivity {
 
 
             String OriDest = "origin="+origin.latitude+","+origin.longitude+"&destination="+destination.latitude+","+destination.longitude;
-
             String sensor = "sensor=false";
             String params = OriDest+"&%20"+ waypoints + "&" + sensor;
             String output = "json";
@@ -287,14 +267,25 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         return null;
     }
     private void setUserLocationCallback(){
-        Firebase.setAndroidContext(this.getApplicationContext());
-        FirebaseDataHandler fd = new FirebaseDataHandler();
-        fd.getLocation(_user, new getLocationCallbackInterface() {
+        Log.d(TAG, "Inside setUserLocationCallback ");
+        _fd.getLocation(_user, new getLocationCallbackInterface() {
             @Override
             public void onRetrievingLocation(String user, GeoLocation g) {
                 origin=new LatLng(g.latitude,g.longitude);
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 13));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
 //                googleMap.setMyLocationEnabled(true);
+            }
+        });
+    }
+    private void setFriendLocationCallback(){
+        Log.d(TAG, "Inside setFriendLocationCallback ");
+        if(_friend == null)
+            return;
+        _fd.getLocation(_friend, new getLocationCallbackInterface() {
+            @Override
+            public void onRetrievingLocation(String user, GeoLocation g) {
+                destination=new LatLng(g.latitude,g.longitude);
+                refreshMap();
             }
         });
     }
@@ -407,7 +398,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
 
                 //write code to fetch location here.
                 if(origin != null)
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 13));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
             }
         }
 
@@ -492,41 +483,19 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         public void onLocationChanged(Location loc) {
             //editLocation.setText("");
             //pb.setVisibility(View.INVISIBLE);
-            Firebase.setAndroidContext(context);
-            FirebaseDataHandler fd = new FirebaseDataHandler();
 
-            Toast.makeText(getBaseContext(),
-                    "Location changed: Lat: " + loc.getLatitude() + " Lng: "
-                            + loc.getLongitude(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "Location changed: Lat: " + loc.getLatitude() + " Lng: " + loc.getLongitude(), Toast.LENGTH_SHORT).show();
             String longitude = "Longitude: " + loc.getLongitude();
             Log.v(TAG, longitude);
             String latitude = "Latitude: " + loc.getLatitude();
             Log.v(TAG, latitude);
 
             LatLng currentLocation = new LatLng(loc.getLatitude(), loc.getLongitude());
+            _fd.setLocation(_user, new GeoLocation(loc.getLatitude(), loc.getLongitude()));
             origin = currentLocation;
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,
-                    13));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
 
-            fd.setLocation(_user, new GeoLocation(loc.getLatitude(), loc.getLongitude()));
-            googleMap.clear();
-
-                       String url = getMapsApiDirectionsUrl();
-            if (url != null && destination != null) {
-                Log.i(TAG, " url on Friend location callback is "+ url);
-                ReadTask downloadTask = new ReadTask();
-                downloadTask.execute(url);
-                MarkerOptions options = new MarkerOptions();
-                options.position(origin);
-                options.position(destination);
-                googleMap.addMarker(options);
-
-
-
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin,
-                        13));
-                addMarkers();
-            }
+            refreshMap();
         }
 
         @Override

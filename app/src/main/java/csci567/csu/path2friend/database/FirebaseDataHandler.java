@@ -153,7 +153,7 @@ public class FirebaseDataHandler {
 
             }
         });
-        Log.i(ACL, "added the friend to friend list");
+        Log.i(ACL, "Exiting from get_friends_data ");
     }
 
 
