@@ -20,7 +20,7 @@ public class UserData {
         this.id = id;
         this.friends_list = new HashMap<String, String>();
         //this.location= new GeoLocation(31.1184944, -121.117477);
-        this.friends_list.put("default","");
+        //this.friends_list.put("default","");
         this.location= new GeoLocation(0, 0);
 
     }

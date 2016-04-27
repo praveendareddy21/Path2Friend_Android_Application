@@ -65,6 +65,8 @@ public class GoogleMapsPathActivity extends FragmentActivity {
     final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
     private FirebaseDataHandler _fd= null;
 
+    private ChildEventListener _friend_loc_listener = null;
+
     GoogleMap googleMap;
     final String TAG = "GoogleMapsPathActivity";
 
@@ -92,7 +94,12 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         b1.setOnClickListener(new View.OnClickListener()
         {@Override public void onClick(View v) {
                 Log.i(TAG, " Value set as "+np.getValue());
+                String earlier_friend=_friend;
                 _friend=friends_list[np.getValue()];
+
+                if(_friend != null && !_friend.equals(earlier_friend) && _friend_loc_listener != null){
+                    resetFriendLocationChangeCallback(_user, earlier_friend);
+                }
                 setFriendLocationCallback();
                 setFriendLocationChangeCallback(_user , _friend);
                 d.dismiss();
@@ -116,6 +123,7 @@ public class GoogleMapsPathActivity extends FragmentActivity {
 
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
             addMarkers();
+            Log.d(TAG, "Google Map refreshed.");
         }
     }
 
@@ -126,7 +134,6 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
                 MODE_PRIVATE);
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
-
 
 
         Firebase.setAndroidContext(this.getApplicationContext());
@@ -220,14 +227,14 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         refreshMap();
     }
 
-    private void setFriendLocationChangeCallback(String user, String friend){
+       private void setFriendLocationChangeCallback(String user, String friend){
         FirebaseDataHandler fd = new FirebaseDataHandler();
         Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
         Log.i(TAG, "Inside setFriendLocationChangeCallback  in Google MapPath for "+friend);
         final String userName= user;
         final String friendName = friend;
 
-        getLocref.addChildEventListener(new ChildEventListener() {
+        ChildEventListener listener=  getLocref.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             }
@@ -244,7 +251,24 @@ public class GoogleMapsPathActivity extends FragmentActivity {
             }
             @Override public void onChildRemoved(DataSnapshot dataSnapshot) {}
             @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-            @Override public void onCancelled(FirebaseError firebaseError) {}});
+            @Override public void onCancelled(FirebaseError firebaseError) {}}
+
+        );
+        _friend_loc_listener = listener;
+
+    }
+
+    private void resetFriendLocationChangeCallback(String user, String friend){
+        FirebaseDataHandler fd = new FirebaseDataHandler();
+        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
+        Log.i(TAG, "Inside resetFriendLocationChangeCallback  in Google MapPath for "+friend);
+
+        if(_friend_loc_listener != null) {
+            getLocref.removeEventListener(_friend_loc_listener);
+            Log.i(TAG, " Removed EventListener for Friend location change callback");
+        }
+
+
     }
 
     private String getMapsApiDirectionsUrl() {
@@ -271,9 +295,14 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         _fd.getLocation(_user, new getLocationCallbackInterface() {
             @Override
             public void onRetrievingLocation(String user, GeoLocation g) {
-                origin=new LatLng(g.latitude,g.longitude);
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+                if(g.getLatitude() ==0.0 && g.getLongitude() == 0.0 ){
+                    return;
+                }
+                else{
+                    origin=new LatLng(g.latitude,g.longitude);
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
 //                googleMap.setMyLocationEnabled(true);
+                }
             }
         });
     }
@@ -284,6 +313,11 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         _fd.getLocation(_friend, new getLocationCallbackInterface() {
             @Override
             public void onRetrievingLocation(String user, GeoLocation g) {
+                if(g.getLatitude()==0.0 || g.getLongitude() == 0.0){
+                    Log.e(TAG, " User "+_friend +" location has not been set up");
+                    //googleMap.clear();
+                    return;
+                }
                 destination=new LatLng(g.latitude,g.longitude);
                 refreshMap();
             }
