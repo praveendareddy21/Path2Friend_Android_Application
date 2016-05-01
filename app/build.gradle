@@ -52,4 +52,5 @@ dependencies {
     compile 'com.firebase:firebase-client-android:2.5.1+'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
     compile 'com.google.android.gms:play-services-maps:8.3.0'
+    compile 'com.squareup:seismic:1.0.2'
 }

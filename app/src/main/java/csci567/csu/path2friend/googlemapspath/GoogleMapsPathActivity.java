@@ -13,6 +13,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.content.SharedPreferences;
     import android.content.pm.PackageManager;
     import android.graphics.Color;
+    import android.hardware.SensorManager;
     import android.location.Location;
     import android.location.LocationListener;
     import android.location.LocationManager;
@@ -47,9 +48,10 @@ package csci567.csu.path2friend.googlemapspath;
     import com.google.android.gms.maps.model.LatLng;
     import com.google.android.gms.maps.model.MarkerOptions;
     import com.google.android.gms.maps.model.PolylineOptions;
+    import com.squareup.seismic.ShakeDetector;
 
 
-public class GoogleMapsPathActivity extends FragmentActivity {
+public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDetector.Listener {
 
     public interface getFriendListCallbackInterface {
         void onRetrievingFriendList(String user, Set<String> friendList);
@@ -203,7 +205,16 @@ public class GoogleMapsPathActivity extends FragmentActivity {
         }
     });
 
+        SensorManager sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        ShakeDetector sd = new ShakeDetector(this);
+        sd.start(sensorManager);
+
     }
+
+    public void hearShake() {
+        Toast.makeText(this, "Don't shake me, bro!", Toast.LENGTH_SHORT).show();
+    }
+    
     private void getUsersFriendlist(String user){
        _fd.get_friends_data(user, new getFriendListCallbackInterface() {
             @Override
