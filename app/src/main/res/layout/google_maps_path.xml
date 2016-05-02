@@ -33,4 +33,11 @@
         android:layout_alignTop="@+id/fab"
         android:layout_toLeftOf="@+id/fab" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80ff0000"
+        android:clickable="true"
+        android:id="@+id/sosView"
+        android:visibility="gone"></View>
 </RelativeLayout>

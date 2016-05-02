@@ -38,6 +38,8 @@ package csci567.csu.path2friend.googlemapspath;
     import csci567.csu.path2friend.database.Model;
     import csci567.csu.path2friend.database.UserData;
 
+    import com.daimajia.androidanimations.library.Techniques;
+    import com.daimajia.androidanimations.library.YoYo;
     import com.firebase.client.ChildEventListener;
     import com.firebase.client.DataSnapshot;
     import com.firebase.client.Firebase;
@@ -48,6 +50,7 @@ package csci567.csu.path2friend.googlemapspath;
     import com.google.android.gms.maps.model.LatLng;
     import com.google.android.gms.maps.model.MarkerOptions;
     import com.google.android.gms.maps.model.PolylineOptions;
+    import com.nineoldandroids.animation.Animator;
     import com.squareup.seismic.ShakeDetector;
 
 
@@ -71,6 +74,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
     GoogleMap googleMap;
     final String TAG = "GoogleMapsPathActivity";
+    View sosView;
 
     public void callNumberPicker(String [] friends){
         Log.i(TAG, "Starting Number Picker for selecting friend out of friends list");
@@ -129,6 +133,9 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         }
     }
 
+    private int tapCounter = 1;
+    Button share_loc_button;
+    FloatingActionButton fab1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,12 +145,14 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
 
 
+        sosView = findViewById(R.id.sosView);
+
         Firebase.setAndroidContext(this.getApplicationContext());
         _fd = new FirebaseDataHandler();
 
         setUserLocationCallback();
 
-        Button share_loc_button= (Button)findViewById(R.id.startSharingButton);
+        share_loc_button= (Button)findViewById(R.id.startSharingButton);
         share_loc_button.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -163,7 +172,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
         handlePermissionForLocation();
 
-        FloatingActionButton fab1 = (FloatingActionButton) findViewById(R.id.fab);
+        fab1 = (FloatingActionButton) findViewById(R.id.fab);
         fab1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -209,10 +218,75 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         ShakeDetector sd = new ShakeDetector(this);
         sd.start(sensorManager);
 
+        sosView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if (tapCounter % 5 == 0) {
+
+                    YoYo.with(Techniques.BounceInUp).duration(800).withListener(new Animator.AnimatorListener(){
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            sosView.setVisibility(View.GONE);
+                            share_loc_button.setEnabled(true);
+                            fab1.setEnabled(true);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
+                        }
+                    }).playOn(sosView);
+                    tapCounter++;
+                }
+                else {
+                    tapCounter ++;
+                }
+            }
+        });
+
     }
 
+//    boolean sosActivated = false;
     public void hearShake() {
-        Toast.makeText(this, "Don't shake me, bro!", Toast.LENGTH_SHORT).show();
+        if (sosView.getVisibility() == View.GONE) {
+//            sosView.setVisibility(View.VISIBLE);
+
+            //Send SMS every 5 minutes
+            YoYo.with(Techniques.BounceInDown).duration(800).withListener(new Animator.AnimatorListener(){
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    sosView.setVisibility(View.VISIBLE);
+                    share_loc_button.setEnabled(false);
+                    fab1.setEnabled(false);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+
+                }
+            }).playOn(sosView);
+        }
+//        Toast.makeText(this, "Don't shake me, bro!", Toast.LENGTH_SHORT).show();
     }
     
     private void getUsersFriendlist(String user){
