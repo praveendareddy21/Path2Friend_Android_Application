@@ -52,6 +52,8 @@ package csci567.csu.path2friend.googlemapspath;
     import com.google.android.gms.maps.model.PolylineOptions;
     import com.nineoldandroids.animation.Animator;
     import com.squareup.seismic.ShakeDetector;
+    import com.firebase.geofire.util.GeoUtils;
+
 
 
 public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDetector.Listener {
@@ -119,6 +121,8 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         String url = getMapsApiDirectionsUrl();
         if (url != null) {
             Log.i(TAG, " url in refresh Map is "+ url);
+            double newDist = GeoUtils.distance(origin.latitude, origin.longitude, destination.latitude, destination.longitude);
+
             ReadTask downloadTask = new ReadTask();
             downloadTask.execute(url);
             MarkerOptions options = new MarkerOptions();
@@ -129,6 +133,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
             addMarkers();
+            Toast.makeText(this, "Updated distance between you and your friend is "+newDist +" metres.", Toast.LENGTH_LONG).show();
             Log.d(TAG, "Google Map refreshed.");
         }
     }
@@ -144,8 +149,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                 MODE_PRIVATE);
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
 
-
-        sosView = findViewById(R.id.sosView);
+         sosView = findViewById(R.id.sosView);
 
         Firebase.setAndroidContext(this.getApplicationContext());
         _fd = new FirebaseDataHandler();
