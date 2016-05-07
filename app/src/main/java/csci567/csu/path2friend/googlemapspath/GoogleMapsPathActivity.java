@@ -19,6 +19,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.location.LocationManager;
     import android.os.AsyncTask;
     import android.os.Bundle;
+    import android.os.Handler;
     import android.support.design.widget.FloatingActionButton;
     import android.support.design.widget.Snackbar;
     import android.support.v4.app.ActivityCompat;
@@ -141,6 +142,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
     private int tapCounter = 1;
     Button share_loc_button;
     FloatingActionButton fab1;
+    private Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -227,6 +229,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
             public void onClick(View v) {
                 if (tapCounter % 5 == 0) {
 
+                    //Stop SOS
                     YoYo.with(Techniques.BounceInUp).duration(800).withListener(new Animator.AnimatorListener(){
                         @Override
                         public void onAnimationStart(Animator animation) {
@@ -257,7 +260,6 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                 }
             }
         });
-
     }
 
 //    boolean sosActivated = false;
@@ -266,6 +268,15 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 //            sosView.setVisibility(View.VISIBLE);
 
             //Send SMS every 5 minutes
+            final int intervalTime =10000;// 10 sec
+            handler =new Handler();
+            handler.postDelayed(new Runnable(){
+                @Override
+                public void run(){
+                    Log.d(TAG, "Handler is working!!!");
+                    handler.postDelayed(this, intervalTime);
+                }}, intervalTime);
+
             YoYo.with(Techniques.BounceInDown).duration(800).withListener(new Animator.AnimatorListener(){
                 @Override
                 public void onAnimationStart(Animator animation) {
