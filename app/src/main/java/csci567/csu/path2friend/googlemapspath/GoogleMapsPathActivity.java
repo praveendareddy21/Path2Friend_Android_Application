@@ -230,6 +230,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                 if (tapCounter % 5 == 0) {
 
                     //Stop SOS
+                    handler.removeCallbacksAndMessages(null);
                     YoYo.with(Techniques.BounceInUp).duration(800).withListener(new Animator.AnimatorListener(){
                         @Override
                         public void onAnimationStart(Animator animation) {
