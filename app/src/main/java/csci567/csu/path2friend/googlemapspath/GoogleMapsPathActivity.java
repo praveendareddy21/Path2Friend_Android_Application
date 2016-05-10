@@ -290,8 +290,8 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
                     HttpUrl.Builder urlBuilder = HttpUrl.parse("http://athwani.net/p2f/api.php").newBuilder();
                     urlBuilder.addQueryParameter("emails", allFriends);
-                    urlBuilder.addQueryParameter("latitude", Double.toString(37.8));
-                    urlBuilder.addQueryParameter("longitude", Double.toString(-121.8));
+                    urlBuilder.addQueryParameter("latitude", Double.toString(origin.latitude));
+                    urlBuilder.addQueryParameter("longitude", Double.toString(origin.longitude));
                     urlBuilder.addQueryParameter("from", _user);
 
                     String url = urlBuilder.build().toString();
@@ -315,7 +315,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
 
                     });
-                    
+
                     handler.postDelayed(this, intervalTime);
                 }}, intervalTime);
 
