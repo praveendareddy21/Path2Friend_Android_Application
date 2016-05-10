@@ -1,4 +1,5 @@
 package csci567.csu.path2friend.googlemapspath;
+    import java.io.IOException;
     import java.util.ArrayList;
     import java.util.HashMap;
     import java.util.List;
@@ -38,6 +39,12 @@ package csci567.csu.path2friend.googlemapspath;
     import csci567.csu.path2friend.database.GeoLocation;
     import csci567.csu.path2friend.database.Model;
     import csci567.csu.path2friend.database.UserData;
+    import okhttp3.Call;
+    import okhttp3.Callback;
+    import okhttp3.HttpUrl;
+    import okhttp3.OkHttpClient;
+    import okhttp3.Request;
+    import okhttp3.Response;
 
     import com.daimajia.androidanimations.library.Techniques;
     import com.daimajia.androidanimations.library.YoYo;
@@ -163,12 +170,13 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
             @Override
             public void onClick(View v) {
-                getUsersFriendlist(_user);
+//                getUsersFriendlist(_user);
+                callNumberPicker(friends);
             }
         });
 
 
-
+        getUsersFriendlist(_user);
         Log.i(TAG, "In on create of GoogleMapsPathActivity");
 
 
@@ -261,6 +269,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                 }
             }
         });
+
     }
 
 //    boolean sosActivated = false;
@@ -270,11 +279,43 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
             //Send SMS every 5 minutes
             final int intervalTime =10000;// 10 sec
+
             handler =new Handler();
             handler.postDelayed(new Runnable(){
                 @Override
                 public void run(){
                     Log.d(TAG, "Handler is working!!!");
+
+                    OkHttpClient client = new OkHttpClient();
+
+                    HttpUrl.Builder urlBuilder = HttpUrl.parse("http://athwani.net/p2f/api.php").newBuilder();
+                    urlBuilder.addQueryParameter("emails", allFriends);
+                    urlBuilder.addQueryParameter("latitude", Double.toString(37.8));
+                    urlBuilder.addQueryParameter("longitude", Double.toString(-121.8));
+                    urlBuilder.addQueryParameter("from", _user);
+
+                    String url = urlBuilder.build().toString();
+
+                    Request request = new Request.Builder().url(url).build();
+
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+
+                        }
+
+                        @Override
+                        public void onResponse(Call call, final Response response) throws IOException {
+                            // ... check for failure using `isSuccessful` before proceeding
+
+                            // Read data on the worker thread
+                            final String responseData = response.body().string();
+                            Log.d(TAG, responseData);
+                        }
+
+
+                    });
+                    
                     handler.postDelayed(this, intervalTime);
                 }}, intervalTime);
 
@@ -304,13 +345,19 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         }
 //        Toast.makeText(this, "Don't shake me, bro!", Toast.LENGTH_SHORT).show();
     }
-    
+    private String allFriends = "";
+    private String[] friends;
     private void getUsersFriendlist(String user){
        _fd.get_friends_data(user, new getFriendListCallbackInterface() {
             @Override
             public void onRetrievingFriendList(String user, Set<String> friendList) {
-                String[] friends = friendList.toArray(new String[friendList.size()]);
-                callNumberPicker(friends);
+                friends = friendList.toArray(new String[friendList.size()]);
+
+                for (String fr: friends) {
+                    if (!fr.equals("default")) {
+                        allFriends += fr.replace(',','.') + ",";
+                    }
+                }
             }
         });
 
