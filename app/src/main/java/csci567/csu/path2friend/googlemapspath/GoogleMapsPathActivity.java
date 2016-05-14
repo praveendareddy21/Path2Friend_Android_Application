@@ -158,7 +158,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                 MODE_PRIVATE);
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
 
-         sosView = findViewById(R.id.sosView);
+        sosView = findViewById(R.id.sosView);
 
         Firebase.setAndroidContext(this.getApplicationContext());
         _fd = new FirebaseDataHandler();
@@ -376,20 +376,19 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
     }
 
        private void setFriendLocationChangeCallback(String user, String friend){
-        FirebaseDataHandler fd = new FirebaseDataHandler();
-        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
         Log.i(TAG, "Inside setFriendLocationChangeCallback  in Google MapPath for "+friend);
         final String userName= user;
         final String friendName = friend;
 
-        ChildEventListener listener=  getLocref.addChildEventListener(new ChildEventListener() {
+
+        ChildEventListener listener=  new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                if("location".equals(dataSnapshot.getKey().toString())) {
+                if ("location".equals(dataSnapshot.getKey().toString())) {
                     GeoLocation g = dataSnapshot.getValue(GeoLocation.class);
                     if (g != null) {
                         Log.i(TAG, "in On ChildChanged lat : " + g.latitude + " long : " + g.longitude);
@@ -397,26 +396,30 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                     }
                 }
             }
-            @Override public void onChildRemoved(DataSnapshot dataSnapshot) {}
-            @Override public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
-            @Override public void onCancelled(FirebaseError firebaseError) {}}
 
-        );
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+
+        };
         _friend_loc_listener = listener;
-
+        _fd.setFriendLocationChangeCallback(user, friend, listener);
     }
 
     private void resetFriendLocationChangeCallback(String user, String friend){
-        FirebaseDataHandler fd = new FirebaseDataHandler();
-        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
         Log.i(TAG, "Inside resetFriendLocationChangeCallback  in Google MapPath for "+friend);
-
         if(_friend_loc_listener != null) {
-            getLocref.removeEventListener(_friend_loc_listener);
+            _fd.resetFriendLocationChangeCallback(user, friend,_friend_loc_listener );
             Log.i(TAG, " Removed EventListener for Friend location change callback");
         }
-
-
     }
 
     private String getMapsApiDirectionsUrl() {

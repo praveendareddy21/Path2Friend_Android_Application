@@ -24,15 +24,12 @@ public class FirebaseDataHandler {
     private Firebase myFirebaseRef;
 
 
-
     public FirebaseDataHandler(){
          myFirebaseRef = new Firebase("https://brilliant-inferno-6550.firebaseio.com");
     }
 
 
-
     public void save_userdata(UserData u){
-
 
 
         Firebase userRef = this.myFirebaseRef.child("users").child(u.getFullName());
@@ -57,7 +54,6 @@ public class FirebaseDataHandler {
                 } else {
                     Log.i(ACL, "search query for " + userName + " has returned false");
                     callback1.onFailedUserAuthenticaion(userName);
-
                 }
             }
 
@@ -160,14 +156,12 @@ public class FirebaseDataHandler {
 
     public void search_friend(UserData u){
 
-        Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+       // Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        Firebase ref =this.myFirebaseRef.child("users");
 
         // Query queryRef = ref.orderByChild("FullName").equalTo(u.getFullName());
         Log.i(ACL, "tring with  user data" + u.getFullName());
         final String userName = u.getFullName();
-
-
-
 
         ref.orderByChild(u.getFullName()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -176,9 +170,6 @@ public class FirebaseDataHandler {
                 String friends = "";
 
                 Log.i(ACL, " key is " + dataSnapshot.getKey() +" value is "+dataSnapshot.getValue());
-
-
-                Log.i(ACL, "In Goddamn Child listner " + dataSnapshot.getKey() + " dinosaur's score is " + dataSnapshot.getValue());
                 if (dataSnapshot.hasChild(userName)) {
                     friends = dataSnapshot.child(userName).child("friends").getValue().toString();
                     Log.i(ACL, "friends of " + userName + " is " + friends);
@@ -195,13 +186,12 @@ public class FirebaseDataHandler {
         Log.i(ACL, "tried  retrirv  user data");
     }
 
-    public void print_method(){
 
-        Log.i(ACL, "just a method ");
-    }
 
     public boolean  search_by_key(String su) {
-        Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        // Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        Firebase ref =this.myFirebaseRef.child("users");
+
         final String userName = su;
         final boolean result =false;
 
@@ -210,8 +200,6 @@ public class FirebaseDataHandler {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChild(userName)) {
                     Log.i(ACL, "search query for " + userName + " is true ");
-                    print_method();
-
 
                 }
                 else{
@@ -231,7 +219,8 @@ public class FirebaseDataHandler {
 
     public void setFriendData (String su){
 
-        Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        // Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        Firebase ref =this.myFirebaseRef.child("users");
 
         Log.i(ACL, "tring with  user data" + su);
         final String userName = su;
@@ -263,8 +252,8 @@ public class FirebaseDataHandler {
     }
 
     public void setUserDatatoModel (String su){
-        Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
-
+        // Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        Firebase ref =this.myFirebaseRef.child("users");
 
         Log.i(ACL, "tring with  user data set user data to model" + su);
         final String userName = su;
@@ -292,12 +281,15 @@ public class FirebaseDataHandler {
     }
 
     public void setLocation(String user, GeoLocation g){
-        Firebase setLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        //Firebase setLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        // Firebase ref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users");
+        Firebase setLocref =this.myFirebaseRef.child("users");
         setLocref.child(user).child("location").setValue(g);
     }
 
     public void  getLocation(String user, final GoogleMapsPathActivity.getLocationCallbackInterface callback) {
-        Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+user);
+        //Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+user);
+        Firebase getLocref = this.myFirebaseRef.child("users").child(user);
         Log.i(ACL, "Inside getLocation for user :  "+user);
         final String userName= user;
 
@@ -336,6 +328,28 @@ public class FirebaseDataHandler {
 
             }
         });
+
+    }
+
+    public void setFriendLocationChangeCallback(String user, String friend, ChildEventListener celistner){
+        //FirebaseDataHandler fd = new FirebaseDataHandler();
+        //Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
+        Firebase getLocref = this.myFirebaseRef.child("users").child(friend);
+        Log.i(ACL, "Inside setFriendLocationChangeCallback  in Google MapPath for "+friend);
+        final String userName= user;
+        final String friendName = friend;
+
+        ChildEventListener listener=  getLocref.addChildEventListener(celistner);
+
+    }
+
+    public void resetFriendLocationChangeCallback(String user, String friend, ChildEventListener celistner){
+        //Firebase getLocref = new Firebase("https://brilliant-inferno-6550.firebaseio.com//users//"+friend);
+        Firebase getLocref = this.myFirebaseRef.child("users").child(friend);
+        Log.i(ACL, "Inside resetFriendLocationChangeCallback  in Google MapPath for "+friend);
+        getLocref.removeEventListener(celistner);
+
+
 
     }
 
