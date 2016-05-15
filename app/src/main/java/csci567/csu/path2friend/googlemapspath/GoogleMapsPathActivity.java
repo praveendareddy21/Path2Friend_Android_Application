@@ -26,6 +26,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.support.v4.app.ActivityCompat;
     import android.support.v4.app.FragmentActivity;
     import android.support.v4.content.ContextCompat;
+    import android.support.v4.content.res.TypedArrayUtils;
     import android.util.Log;
     import android.view.LayoutInflater;
     import android.view.View;
