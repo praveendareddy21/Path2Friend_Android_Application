@@ -79,6 +79,7 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
     private String _friend= null;
     final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
     private FirebaseDataHandler _fd= null;
+    private String allFriends = "";
 
     private ChildEventListener _friend_loc_listener = null;
 
@@ -153,10 +154,12 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "In on create of GoogleMapsPathActivity");
         setContentView(R.layout.google_maps_path);
         SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
                 MODE_PRIVATE);
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
+        //this._user= getIntent().getStringExtra("user_name");
 
         sosView = findViewById(R.id.sosView);
 
@@ -170,14 +173,11 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
 
             @Override
             public void onClick(View v) {
-//                getUsersFriendlist(_user);
-                callNumberPicker(friends);
+                getUsersFriendlist(_user);
             }
         });
 
 
-        getUsersFriendlist(_user);
-        Log.i(TAG, "In on create of GoogleMapsPathActivity");
 
 
 
@@ -213,6 +213,21 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
                 }
 
                 _fd.add_friend(_user ,friendEmail.replace('.', ','));
+                _fd.get_friends_data(_user, new getFriendListCallbackInterface() {
+                    @Override
+                    public void onRetrievingFriendList(String user, Set<String> friendList) {
+                        String [] friends = friendList.toArray(new String[friendList.size()]);
+
+                        String temp="";
+                        for (String fr: friends) {
+                            if (!fr.equals("default")) {
+                                temp += fr.replace(',','.') + ",";
+                            }
+                        }
+                        allFriends = temp;
+                    }
+                });
+
 
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -345,19 +360,21 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         }
 //        Toast.makeText(this, "Don't shake me, bro!", Toast.LENGTH_SHORT).show();
     }
-    private String allFriends = "";
-    private String[] friends;
+
     private void getUsersFriendlist(String user){
        _fd.get_friends_data(user, new getFriendListCallbackInterface() {
             @Override
             public void onRetrievingFriendList(String user, Set<String> friendList) {
-                friends = friendList.toArray(new String[friendList.size()]);
+                String [] friends = friendList.toArray(new String[friendList.size()]);
+                callNumberPicker(friends);
 
+                String temp="";
                 for (String fr: friends) {
                     if (!fr.equals("default")) {
-                        allFriends += fr.replace(',','.') + ",";
+                        temp += fr.replace(',','.') + ",";
                     }
                 }
+                allFriends = temp;
             }
         });
 
