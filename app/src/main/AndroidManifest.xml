@@ -16,6 +16,7 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name"
+
             android:theme="@style/AppTheme.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +26,9 @@
         </activity>
         <activity
             android:name=".googlemapspath.GoogleMapsPathActivity"
-            android:label="@string/title_activity_path_google_map" >
+            android:label="@string/title_activity_path_google_map"
+            android:theme="@style/AppTheme.NoActionBar" >
+
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN" />-->
 

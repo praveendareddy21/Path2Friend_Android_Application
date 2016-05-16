@@ -27,6 +27,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.support.v4.app.FragmentActivity;
     import android.support.v4.content.ContextCompat;
     import android.support.v4.content.res.TypedArrayUtils;
+    import android.support.v7.app.AppCompatActivity;
     import android.util.Log;
     import android.view.LayoutInflater;
     import android.view.View;
@@ -62,10 +63,12 @@ package csci567.csu.path2friend.googlemapspath;
     import com.nineoldandroids.animation.Animator;
     import com.squareup.seismic.ShakeDetector;
     import com.firebase.geofire.util.GeoUtils;
+    import android.support.v7.app.AppCompatActivity;
+    import android.support.v7.widget.Toolbar;
 
 
 
-public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDetector.Listener {
+public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDetector.Listener {
 
     public interface getFriendListCallbackInterface {
         void onRetrievingFriendList(String user, Set<String> friendList);
@@ -157,6 +160,8 @@ public class GoogleMapsPathActivity extends FragmentActivity implements ShakeDet
         super.onCreate(savedInstanceState);
         Log.i(TAG, "In on create of GoogleMapsPathActivity");
         setContentView(R.layout.google_maps_path);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(myToolbar);
         SharedPreferences sharedPreferences = getSharedPreferences("csci567.csu.path2friend",
                 MODE_PRIVATE);
         this._user= sharedPreferences.getString(getString(R.string.emailID), "").replace('.', ',');
