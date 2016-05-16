@@ -30,6 +30,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.support.v7.app.AppCompatActivity;
     import android.util.Log;
     import android.view.LayoutInflater;
+    import android.view.Menu;
     import android.view.View;
     import android.widget.Button;
     import android.widget.EditText;
@@ -65,6 +66,7 @@ package csci567.csu.path2friend.googlemapspath;
     import com.firebase.geofire.util.GeoUtils;
     import android.support.v7.app.AppCompatActivity;
     import android.support.v7.widget.Toolbar;
+    import android.view.MenuItem;
 
 
 
@@ -714,6 +716,33 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {}
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_about:
+                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_exit:
+                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+                // Exit option clicked.
+                return true;
+            case R.id.action_settings:
+                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+                // Settings option clicked.
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }
