@@ -191,6 +191,7 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
 
        SupportMapFragment fm = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         googleMap = fm.getMap();
+        googleMap.setPadding(0,200,0,0);
 
         handlePermissionForLocation();
 
