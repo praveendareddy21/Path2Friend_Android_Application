@@ -74,6 +74,7 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
 
     public interface getFriendListCallbackInterface {
         void onRetrievingFriendList(String user, Set<String> friendList);
+        void onNullFriendsList(String user);
     }
     public interface getLocationCallbackInterface {
         void onRetrievingLocation(String user, GeoLocation g);
@@ -235,7 +236,13 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
                         }
                         allFriends = temp;
                     }
+
+                    @Override
+                    public void onNullFriendsList(String user) {
+                        Log.i(TAG," NO Friends!! HAHA");
+                    }
                 });
+
 
 
             }
@@ -385,7 +392,22 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
                 }
                 allFriends = temp;
             }
-        });
+
+           @Override
+           public void onNullFriendsList(String user) {
+               Log.i(TAG, " NO friends !!");
+               AlertDialog.Builder builder = new AlertDialog.Builder(GoogleMapsPathActivity.this);
+               builder.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialog, int which) {
+
+                   }
+               }).setIcon(R.mipmap.ic_launcher).setTitle("No friends in your Friends list")
+                       .setMessage("Your friend's list is currently empty. Add friends using (+) Button to the right");
+               AlertDialog diag = builder.create();
+               diag.show();
+           }
+       });
 
     }
 
