@@ -37,7 +37,8 @@
                 <!--<category android:name="android.intent.category.LAUNCHER" />-->
             <!--</intent-filter>-->
         </activity>
-
+        <activity android:name="za.co.riggaroo.materialhelptutorial.tutorial.MaterialTutorialActivity"></activity>
+        <activity android:name=".AboutActivity"></activity>
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCucvoaodixKszPbos1rSIqLQZeVn4qUXk" />

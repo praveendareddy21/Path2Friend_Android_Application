@@ -37,6 +37,7 @@ package csci567.csu.path2friend.googlemapspath;
     import android.widget.NumberPicker;
     import android.widget.Toast;
 
+    import csci567.csu.path2friend.AboutActivity;
     import csci567.csu.path2friend.R;
     import csci567.csu.path2friend.database.FirebaseDataHandler;
     import csci567.csu.path2friend.database.GeoLocation;
@@ -48,6 +49,8 @@ package csci567.csu.path2friend.googlemapspath;
     import okhttp3.OkHttpClient;
     import okhttp3.Request;
     import okhttp3.Response;
+    import za.co.riggaroo.materialhelptutorial.TutorialItem;
+    import za.co.riggaroo.materialhelptutorial.tutorial.MaterialTutorialActivity;
 
     import com.daimajia.androidanimations.library.Techniques;
     import com.daimajia.androidanimations.library.YoYo;
@@ -301,6 +304,24 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
             }
         });
 
+        showTutorial();
+    }
+
+    public void showTutorial() {
+        Intent tutIntent = new Intent(this, MaterialTutorialActivity.class);
+        tutIntent.putParcelableArrayListExtra(MaterialTutorialActivity.MATERIAL_TUTORIAL_ARG_TUTORIAL_ITEMS, getTutorialItems(this));
+        startActivityForResult(tutIntent, 100);
+    }
+
+    private ArrayList<TutorialItem> getTutorialItems(Context context) {
+        TutorialItem item1 = new TutorialItem("Activate SOS Mode", "Shake your phone to access SOS mode!!!",R.color.colorPrimary, R.drawable.shake_gesture, R.drawable.shake_gesture);
+        TutorialItem item2 = new TutorialItem("Deactivate SOS Mode", "Tap 5 times on your screen to deactivate SOS!!!",R.color.colorPrimary, R.drawable.shake_gesture, R.drawable.shake_gesture);
+
+        ArrayList<TutorialItem> tutorialItems = new ArrayList<>();
+        tutorialItems.add(item1);
+        tutorialItems.add(item2);
+
+        return tutorialItems;
     }
 
 //    boolean sosActivated = false;
@@ -753,15 +774,18 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_about:
-                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+                Intent aboutIntent = new Intent(GoogleMapsPathActivity.this, AboutActivity.class);
+                startActivity(aboutIntent);
                 return true;
-            case R.id.action_exit:
-                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+//            case R.id.action_exit:
+//                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
                 // Exit option clicked.
-                return true;
-            case R.id.action_settings:
-                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
+//                return true;
+            case R.id.action_tutorial:
+//                Toast.makeText(getApplicationContext(), "Sorry! not implemented yet", Toast.LENGTH_SHORT).show();
                 // Settings option clicked.
+                showTutorial();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
