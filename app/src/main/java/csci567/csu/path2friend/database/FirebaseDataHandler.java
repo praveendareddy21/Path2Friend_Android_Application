@@ -112,36 +112,25 @@ public class FirebaseDataHandler {
         final Firebase userfriendRef = this.myFirebaseRef.child("users").child(user);
         final String userName = user;
 
-        userfriendRef.orderByKey().addChildEventListener(new ChildEventListener() {
+
+
+        userfriendRef.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if("friends_list".equals(dataSnapshot.getKey().toString())) {
-                    //Log.i(ACL, "in On ChildAddedd Friend List  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
-                    HashMap<String, String> FriendList=dataSnapshot.getValue(HashMap.class);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //Log.i(ACL, "in On Datachange  get Friend List  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+
+                if (dataSnapshot.hasChild("friends_list")) {
+                    Log.i(ACL, "inside if friends_list  On Datachange  get Friend List  KEY : " + dataSnapshot.getKey() + " VAL : " + dataSnapshot.getValue());
+                    HashMap<String, String> FriendList=dataSnapshot.child("friends_list").getValue(HashMap.class);
 
                     if(FriendList != null) {
                         Log.i(ACL, "in On ChildAddedd Friend list found " + FriendList.keySet().toString());
                         callback.onRetrievingFriendList(userName, FriendList.keySet());
                     }
-
+                } else {
+                    Log.i(ACL, "in On Datachange  get Friend List User " + userName + " has no friends");
+                    callback.onNullFriendsList(userName);
                 }
-            }
-
-
-
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
             }
 
             @Override
@@ -149,6 +138,8 @@ public class FirebaseDataHandler {
 
             }
         });
+
+
         Log.i(ACL, "Exiting from get_friends_data ");
     }
 
