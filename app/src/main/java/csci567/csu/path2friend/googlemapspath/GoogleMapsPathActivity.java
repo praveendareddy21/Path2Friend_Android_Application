@@ -314,10 +314,12 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
     }
 
     private ArrayList<TutorialItem> getTutorialItems(Context context) {
+        TutorialItem item0 = new TutorialItem("Find the path to Friend", "Select the friend by clicking Share location",R.color.colorPrimary, R.drawable.latest, R.drawable.latest);
         TutorialItem item1 = new TutorialItem("Activate SOS Mode", "Shake your phone to access SOS mode!!!",R.color.colorPrimary, R.drawable.shake_gesture, R.drawable.shake_gesture);
         TutorialItem item2 = new TutorialItem("Deactivate SOS Mode", "Tap 5 times on your screen to deactivate SOS!!!",R.color.colorPrimary, R.drawable.shake_gesture, R.drawable.shake_gesture);
 
         ArrayList<TutorialItem> tutorialItems = new ArrayList<>();
+        tutorialItems.add(item0);
         tutorialItems.add(item1);
         tutorialItems.add(item2);
 
