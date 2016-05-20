@@ -16,6 +16,6 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="20dp"
-        android:text="This is a super awesome app!!!!!"
+        android:text="Path2Friend is an application that allows you to share your location in real time with a friend and in the case of an emergency, it allows you to send regular location updates via email to your friends! Developed by Mohit Athwani and Praveen Dareddy."
         android:gravity="center"/>
 </LinearLayout>
