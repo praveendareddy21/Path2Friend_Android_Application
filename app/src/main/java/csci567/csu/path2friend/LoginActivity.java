@@ -1,5 +1,6 @@
 package csci567.csu.path2friend;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -16,7 +17,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+
 import csci567.csu.path2friend.googlemapspath.GoogleMapsPathActivity;
+import za.co.riggaroo.materialhelptutorial.TutorialItem;
+import za.co.riggaroo.materialhelptutorial.tutorial.MaterialTutorialActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -49,6 +54,26 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(this, GoogleMapsPathActivity.class);
             startActivity(intent);
         }
+        else {
+            showTutorial();
+        }
+    }
+
+    public void showTutorial() {
+        Intent tutIntent = new Intent(this, MaterialTutorialActivity.class);
+        tutIntent.putParcelableArrayListExtra(MaterialTutorialActivity.MATERIAL_TUTORIAL_ARG_TUTORIAL_ITEMS, getTutorialItems(this));
+        startActivityForResult(tutIntent, 100);
+    }
+
+    private ArrayList<TutorialItem> getTutorialItems(Context context) {
+        TutorialItem item1 = new TutorialItem("Activate SOS Mode", "Shake your phone to access SOS mode!!!",R.color.colorPrimary, R.drawable.shake_gesture, R.drawable.shake_gesture);
+        TutorialItem item2 = new TutorialItem("Deactivate SOS Mode", "Tap 5 times on your screen to deactivate SOS!!!",R.color.colorPrimary, R.drawable.shake_gesture, R.drawable.shake_gesture);
+
+        ArrayList<TutorialItem> tutorialItems = new ArrayList<>();
+        tutorialItems.add(item1);
+        tutorialItems.add(item2);
+
+        return tutorialItems;
     }
 
     @Override

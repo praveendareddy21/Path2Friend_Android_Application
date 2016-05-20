@@ -304,7 +304,7 @@ public class GoogleMapsPathActivity extends AppCompatActivity implements ShakeDe
             }
         });
 
-        showTutorial();
+//        showTutorial();
     }
 
     public void showTutorial() {
